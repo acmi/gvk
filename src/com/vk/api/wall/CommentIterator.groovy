@@ -28,6 +28,7 @@ class CommentIterator extends VKIterator<Comment> {
             engine.executeQuery('wall.getComments', [
                     owner_id: ownerId,
                     post_id: postId,
+                    count: 1
             ]).count.text().toInteger()
         }
     }
