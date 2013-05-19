@@ -22,6 +22,7 @@ import java.util.logging.Level
 /**
  * @author acmi
  */
+@CompileStatic
 class VKEngine {
     private static final String PROTOCOL = 'https'
     private static final String HOST = 'api.vk.com'
@@ -136,28 +137,28 @@ class VKEngine {
     }
 
     @ToString(includePackage = false, includeNames = true)
-    private static class RequestWrapper implements Comparable<RequestWrapper>{
+    private static class RequestWrapper implements Comparable<RequestWrapper> {
         final VKRequest request
         final long creationTime
         final long expireTime
 
-        RequestWrapper(VKRequest request, long timeout, TimeUnit unit){
+        RequestWrapper(VKRequest request, long timeout, TimeUnit unit) {
             this.request = request
             this.creationTime = System.currentTimeMillis()
             long millis = unit.toMillis(timeout)
             if (Long.MAX_VALUE - millis - this.creationTime > 0)
-                this.expireTime = this.creationTime+millis
+                this.expireTime = this.creationTime + millis
             else
                 this.expireTime = Long.MAX_VALUE
         }
 
         @Override
         int compareTo(RequestWrapper o) {
-            Long.compare(expireTime, o.expireTime)
+            expireTime - o.expireTime
         }
     }
 
-    String executeQuery(VKRequest query, long timeout=Long.MAX_VALUE, TimeUnit unit=TimeUnit.MILLISECONDS) throws IOException, TimeoutException {
+    String executeQuery(VKRequest query, long timeout = Long.MAX_VALUE, TimeUnit unit = TimeUnit.MILLISECONDS) throws IOException, TimeoutException {
         if (timeout <= 0)
             throw new TimeoutException()
 
@@ -177,29 +178,32 @@ class VKEngine {
         response.toString()
     }
 
-    Element executeQuery(String method, Map params, long timeout=Long.MAX_VALUE, TimeUnit unit=TimeUnit.MILLISECONDS) throws IOException, VKException {
+    Element executeQuery(String method, Map params, long timeout = Long.MAX_VALUE, TimeUnit unit = TimeUnit.MILLISECONDS) throws IOException, VKException {
         long startTime = System.currentTimeMillis()
         String xmlString = executeQuery(new VKRequest(method, params, true), timeout, unit);
         Document document = xmlBuilder.parse(new ByteArrayInputStream(xmlString.getBytes()));
         Element result = document.documentElement
-        use (DOMCategory){
-            if (result.name() == 'error'){
-                int errorCode = result.error_code.text().toInteger()
-                String errorMsg = result.error_msg.text()
-                Map<String, String> requestParams = [:]
-                result.request_params.param.each {
-                    requestParams.put(it.key.text(), it.value.text())
-                }
+        if (result.tagName == 'error') {
+            int errorCode
+            String errorMsg
+            Map<String, String> requestParams = [:]
 
-                switch (errorCode) {
-                    case VKException.USER_AUTHORIZATION_FAILED:
-                        removeWorkerByToken(requestParams['access_token'])
-                    case VKException.TOO_MANY_REQUESTS_PER_SECOND:
-                        return executeQuery(requestParams['method'], requestParams.findAll { k, v ->
-                            !['oauth', 'method', 'access_token'].contains(k)
-                        }, unit.toMillis(timeout) - System.currentTimeMillis() + startTime, TimeUnit.MILLISECONDS)
-                    default: throw new VKException(errorCode, errorMsg, requestParams)
-                }
+            errorCode = Integer.parseInt(result.getElementsByTagName("error_code").item(0).getTextContent())
+            errorMsg = result.getElementsByTagName("error_msg").item(0).getTextContent()
+            org.w3c.dom.NodeList nl = result.getElementsByTagName("param")
+            for (int i = 0; i < nl.getLength(); i++) {
+                org.w3c.dom.NodeList ps = nl.item(i).getChildNodes()
+                requestParams.put(ps.item(1).getTextContent(), ps.item(3).getTextContent())
+            }
+
+            switch (errorCode) {
+                case VKException.USER_AUTHORIZATION_FAILED:
+                    removeWorkerByToken(requestParams['access_token'])
+                case VKException.TOO_MANY_REQUESTS_PER_SECOND:
+                    return executeQuery(requestParams['method'], requestParams.findAll { k, v ->
+                        !['oauth', 'method', 'access_token'].contains(k)
+                    }, unit.toMillis(timeout) - System.currentTimeMillis() + startTime, TimeUnit.MILLISECONDS)
+                default: throw new VKException(errorCode, errorMsg, requestParams)
             }
         }
         result

@@ -8,7 +8,7 @@ abstract class VKIterator<T> implements Iterator<T>{
     protected final int offset
 
     private int count = -1
-    private int received
+    private int processed
     protected final Queue<T> buffer = new LinkedList<T>()
 
     public VKIterator(VKEngine engine, int offset) {
@@ -16,8 +16,8 @@ abstract class VKIterator<T> implements Iterator<T>{
         this.offset = offset
     }
 
-    protected int getReceived() {
-        return received;
+    protected int getProcessed() {
+        return processed;
     }
 
     @Override
@@ -29,7 +29,7 @@ abstract class VKIterator<T> implements Iterator<T>{
                 throw new RuntimeException(e);
             }
         }
-        return offset + received < count
+        return offset + processed < count
     }
 
     @Override
@@ -40,7 +40,7 @@ abstract class VKIterator<T> implements Iterator<T>{
             } catch (Exception e) {
                 throw new RuntimeException(e)
             }
-        received++
+        processed++
         return buffer.poll()
     }
 

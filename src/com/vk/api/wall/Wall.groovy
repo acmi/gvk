@@ -38,18 +38,18 @@ class Wall {
             use(DOMCategory) {
                 def wall = engine.executeQuery('wall.get', [
                         owner_id: ownerId,
-                        offset: offset + getReceived(),
+                        offset: offset + getProcessed(),
                         count: 100,
                         filter: filter.name()
                 ])
                 wall.post.each {
-                    Post post = new Post()
-
-                    post.id = it.id.text().toInteger()
-                    post.from = it.from_id.text().toInteger()
-                    post.to = it.to_id.text().toInteger()
-                    post.date = new Date(TimeUnit.SECONDS.toMillis(it.date.text().toLong()))
-                    post.text = it.text.text()
+                    Post post = new Post(
+                            new Date(TimeUnit.SECONDS.toMillis(it.date.text().toLong())),
+                            it.text.text(),
+                            it.id.text().toInteger(),
+                            it.from_id.text().toInteger(),
+                            it.to_id.text().toInteger(),
+                    )
 
                     buffer << post
                 }
@@ -95,18 +95,18 @@ class Wall {
                         post_id: postId,
                         sort: sort.name(),
                         need_likes: 0,
-                        offset: offset + getReceived(),
+                        offset: offset + getProcessed(),
                         count: step,
                         preview_length: 0,
                         v: 4.4 //v=4.4 для того, чтобы получать аттачи в комментариях в виде объектов, а не ссылок.
                 ])
                 response.comment.each {
-                    Comment comment = new Comment()
-
-                    comment.id = it.cid.text().toInteger()
-                    comment.user = it.uid.text().toInteger()
-                    comment.date = new Date(it.date.text().toLong() * 1000)
-                    comment.text = it.text.text()
+                    Comment comment = new Comment(
+                            id: it.cid.text().toInteger(),
+                            user: it.uid.text().toInteger(),
+                            date: new Date(it.date.text().toLong() * 1000),
+                            text: it.text.text()
+                    )
 
                     buffer << comment
                 }

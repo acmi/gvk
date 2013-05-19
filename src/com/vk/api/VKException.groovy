@@ -4,20 +4,12 @@ package com.vk.api
  * @author acmi
  */
 class VKException extends Exception{
-    int code
-    Map<String, String> requestParams = [:]
+    final int code
+    final Map<String, String> requestParams = [:]
 
     VKException(int code, String message, Map requestParams){
         super(message)
-        setCode(code)
-        setRequestParams(requestParams)
-    }
-
-    private void setCode(int code){
         this.code = code
-    }
-
-    private void setRequestParams(Map requestParams){
         this.requestParams.putAll(requestParams)
     }
 
