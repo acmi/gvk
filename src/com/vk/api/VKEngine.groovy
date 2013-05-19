@@ -2,19 +2,26 @@ package com.vk.api
 
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
+import groovy.xml.dom.DOMCategory
 import org.thavam.util.concurrent.BlockingHashMap
 import org.thavam.util.concurrent.BlockingMap
+import org.w3c.dom.Document
+import org.w3c.dom.Element
+import org.xml.sax.SAXException
 
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.parsers.ParserConfigurationException
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import java.util.logging.Level
 
 /**
  * @author acmi
  */
-@CompileStatic
 class VKEngine {
     private static final String PROTOCOL = 'https'
     private static final String HOST = 'api.vk.com'
@@ -26,8 +33,18 @@ class VKEngine {
     protected final Queue<RequestWrapper> requests = new PriorityQueue<>()
     protected final BlockingMap<RequestWrapper, Object> responses = new BlockingHashMap<>()
 
+    private DocumentBuilder xmlBuilder
+
     VKEngine() {
         executor.scheduleAtFixedRate(new CleanTask(), 0, 1, TimeUnit.MINUTES)
+
+        try {
+            DocumentBuilderFactory f = DocumentBuilderFactory.newInstance()
+            f.setValidating(false)
+            xmlBuilder = f.newDocumentBuilder()
+        } catch (ParserConfigurationException pce) {
+            throw new RuntimeException(pce);
+        }
     }
 
     private class VKWorker implements Runnable {
@@ -158,5 +175,33 @@ class VKEngine {
                 throw new RuntimeException(response)
         }
         response.toString()
+    }
+
+    Element executeQuery(String method, Map params, long timeout=Long.MAX_VALUE, TimeUnit unit=TimeUnit.MILLISECONDS) throws IOException, VKException {
+        long startTime = System.currentTimeMillis()
+        String xmlString = executeQuery(new VKRequest(method, params, true), timeout, unit);
+        Document document = xmlBuilder.parse(new ByteArrayInputStream(xmlString.getBytes()));
+        Element result = document.documentElement
+        use (DOMCategory){
+            if (result.name() == 'error'){
+                int errorCode = result.error_code.text().toInteger()
+                String errorMsg = result.error_msg.text()
+                Map<String, String> requestParams = [:]
+                result.request_params.param.each {
+                    requestParams.put(it.key.text(), it.value.text())
+                }
+
+                switch (errorCode) {
+                    case VKException.USER_AUTHORIZATION_FAILED:
+                        removeWorkerByToken(requestParams['access_token'])
+                    case VKException.TOO_MANY_REQUESTS_PER_SECOND:
+                        return executeQuery(requestParams['method'], requestParams.findAll { k, v ->
+                            !['oauth', 'method', 'access_token'].contains(k)
+                        }, unit.toMillis(timeout) - System.currentTimeMillis() + startTime, TimeUnit.MILLISECONDS)
+                    default: throw new VKException(errorCode, errorMsg, requestParams)
+                }
+            }
+        }
+        result
     }
 }

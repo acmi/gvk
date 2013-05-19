@@ -4,14 +4,14 @@ import groovy.transform.CompileStatic
 
 @CompileStatic
 abstract class VKIterator<T> implements Iterator<T>{
-    protected final VKEngineGPath engine
+    protected final VKEngine engine
     protected final int offset
 
     private int count = -1
     private int received
     protected final Queue<T> buffer = new LinkedList<T>()
 
-    public VKIterator(VKEngineGPath engine, int offset) {
+    public VKIterator(VKEngine engine, int offset) {
         this.engine = engine
         this.offset = offset
     }
