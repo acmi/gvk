@@ -1,5 +1,6 @@
 package com.vk.api.wall
 
+import com.vk.api.Identifier
 import com.vk.api.VKEngine
 import com.vk.api.VKException
 import com.vk.api.likes.Like
@@ -19,7 +20,7 @@ class Wall {
      * @param offset смещение, необходимое для выборки определенного подмножества сообщений.
      * @param filter определяет, какие типы сообщений на стене необходимо получить. Если параметр не задан, то считается, что он равен <b>all</b>.
      * @return Итератор постов
-     * @exception RuntimeException(wrapped IOException, VKException)
+     * @exception RuntimeException ( wrapped IOException , VKException )
      */
     static Iterator<Post> get(VKEngine engine, int ownerId, int offset = 0, Filter filter = Filter.all) {
         new WallIterator(engine, ownerId, offset, filter)
@@ -40,11 +41,11 @@ class Wall {
      * @throws IOException
      * @throws VKException
      */
-    static Iterator<Post> getById(VKEngine engine, List<PostIdentifier> posts) throws IOException, VKException{
+    static Iterator<Post> getById(VKEngine engine, List<Identifier> posts) throws IOException, VKException {
         use(DOMCategory) {
             Map params = [:]
             if (posts?.size() > 0)
-                params['posts'] = posts.join(',')
+                params['posts'] = posts.collect { it.toString(false) }.join(',')
             def response = engine.executeQuery('wall.getById', params)
             response.post.collect {
                 new Post(
@@ -76,7 +77,7 @@ class Wall {
      * @throws IOException
      * @throws VKException
      */
-    static Integer post(VKEngine engine, int ownerId, String message, List<AttachmentIdentifier> attachments = null, int lat = 0, int lng = 0, int placeId = 0, List services = null, boolean fromGroup = false, boolean signed = false, boolean friendsOnly = false) throws IOException, VKException{
+    static Integer post(VKEngine engine, int ownerId, String message, List<Identifier> attachments = null, int lat = 0, int lng = 0, int placeId = 0, List services = null, boolean fromGroup = false, boolean signed = false, boolean friendsOnly = false) throws IOException, VKException {
         use(DOMCategory) {
             Map params = [
                     owner_id: ownerId,
@@ -90,7 +91,7 @@ class Wall {
             if (message?.length() > 0)
                 params['message'] = message
             if (attachments?.size() > 0)
-                params['attachments'] = attachments.join(',')
+                params['attachments'] = attachments.collect { it.toString(true) }.join(',')
             if (services?.size() > 0)
                 params['services'] = services.join(',')
 
@@ -113,21 +114,21 @@ class Wall {
      * @throws IOException
      * @throws VKException
      */
-    static boolean edit(VKEngine engine, int ownerId, int postId, String message, List<AttachmentIdentifier> attachments = null, int lat = 0, int lng = 0, int placeId = 0) throws IOException, VKException{
-          use(DOMCategory){
-              Map params = [
-                      owner_id: ownerId,
-                      post_id: postId,
-                      lat: lat,
-                      long: lng,
-                      place_id: placeId
-                      ]
-              if (message?.length() > 0)
-                  params['message'] = message
-              if (attachments?.size() > 0)
-                  params['attachments'] = attachments.join(',')
-              engine.executeQuery('wall.edit', params).text() == '1'
-          }
+    static boolean edit(VKEngine engine, int ownerId, int postId, String message, List<Identifier> attachments = null, int lat = 0, int lng = 0, int placeId = 0) throws IOException, VKException {
+        use(DOMCategory) {
+            Map params = [
+                    owner_id: ownerId,
+                    post_id: postId,
+                    lat: lat,
+                    long: lng,
+                    place_id: placeId
+            ]
+            if (message?.length() > 0)
+                params['message'] = message
+            if (attachments?.size() > 0)
+                params['attachments'] = attachments.collect { it.toString(true) }.join(',')
+            engine.executeQuery('wall.edit', params).text() == '1'
+        }
     }
 
     /**
@@ -140,13 +141,13 @@ class Wall {
      * @throws IOException
      * @throws VKException
      */
-    static boolean delete(VKEngine engine, int ownerId, int postId) throws IOException, VKException{
-          use(DOMCategory){
-              engine.executeQuery('wall.delete', [
-                      owner_id: ownerId,
-                      post_id: postId
-              ]).text() == '1'
-          }
+    static boolean delete(VKEngine engine, int ownerId, int postId) throws IOException, VKException {
+        use(DOMCategory) {
+            engine.executeQuery('wall.delete', [
+                    owner_id: ownerId,
+                    post_id: postId
+            ]).text() == '1'
+        }
     }
 
     /**
@@ -159,8 +160,8 @@ class Wall {
      * @throws IOException
      * @throws VKException
      */
-    static boolean restore(VKEngine engine, int ownerId, int postId) throws IOException, VKException{
-        use(DOMCategory){
+    static boolean restore(VKEngine engine, int ownerId, int postId) throws IOException, VKException {
+        use(DOMCategory) {
             engine.executeQuery('wall.restore', [
                     owner_id: ownerId,
                     post_id: postId
@@ -177,7 +178,7 @@ class Wall {
      * @param offset смещение, необходимое для выборки определенного подмножества комментариев.
      * @param sort порядок сортировки комментариев
      * @return Итератор комментариев
-     * @exception RuntimeException(wrapped IOException, VKException)
+     * @exception RuntimeException ( wrapped IOException , VKException )
      */
     static Iterator<Comment> getComments(VKEngine engine, int ownerId, int postId, int offset = 0, Sort sort = Sort.asc) {
         new CommentIterator(engine, ownerId, postId, offset, sort)
@@ -193,7 +194,7 @@ class Wall {
      *
      * @param engine VKEngine
      * @param ownerId идентификатор пользователя, на чьей стене находится запись к которой необходимо добавить комментарий.
-     * @param postId  идентификатор записи на стене пользователя.
+     * @param postId идентификатор записи на стене пользователя.
      * @param text текст комментария к записи на стене пользователя.
      * @param replyToCid идентификатор комментария, ответом на который является добавляемый комментарий.
      * @param attachments список объектов, приложенных к комментарию и разделённых символом ",".Параметр является обязательным, если не задан параметр {@code text}.
@@ -201,8 +202,8 @@ class Wall {
      * @throws IOException
      * @throws VKException
      */
-    static int addComment(VKEngine engine, int ownerId, int postId, String text, int replyToCid = 0, List<AttachmentIdentifier> attachments = null) throws IOException, VKException{
-        use(DOMCategory){
+    static int addComment(VKEngine engine, int ownerId, int postId, String text, int replyToCid = 0, List<Identifier> attachments = null) throws IOException, VKException {
+        use(DOMCategory) {
             Map params = [
                     owner_id: ownerId,
                     post_id: postId,
@@ -211,7 +212,7 @@ class Wall {
             if (text?.length() > 0)
                 params['text'] = text
             if (attachments?.size() > 0)
-                params['attachments'] = attachments.join(',')
+                params['attachments'] = attachments.collect { it.toString(true) }.join(',')
             engine.executeQuery('wall.restore', params).cid.text().toInteger()
         }
     }
@@ -226,8 +227,8 @@ class Wall {
      * @throws IOException
      * @throws VKException
      */
-    static boolean deleteComment(VKEngine engine, int ownerId, int cid) throws IOException, VKException{
-        use(DOMCategory){
+    static boolean deleteComment(VKEngine engine, int ownerId, int cid) throws IOException, VKException {
+        use(DOMCategory) {
             engine.executeQuery('wall.deleteComment', [
                     owner_id: ownerId,
                     cid: cid
@@ -245,8 +246,8 @@ class Wall {
      * @throws IOException
      * @throws VKException
      */
-    static boolean restoreComment(VKEngine engine, int ownerId, int cid) throws IOException, VKException{
-        use(DOMCategory){
+    static boolean restoreComment(VKEngine engine, int ownerId, int cid) throws IOException, VKException {
+        use(DOMCategory) {
             engine.executeQuery('wall.restoreComment', [
                     owner_id: ownerId,
                     cid: cid
@@ -264,9 +265,9 @@ class Wall {
      * @param publishedOnly указывает, что необходимо вернуть информацию только пользователях, опубликовавших данную запись у себя на стене.
      * @param friendsOnly указывает, необходимо ли возвращать только пользователей, которые являются друзьями текущего пользователя.
      * @return Итератор лайков
-     * @exception RuntimeException(wrapped IOException, VKException)
+     * @exception RuntimeException ( wrapped IOException , VKException )
      */
-    static Iterator<Like> getLikes(VKEngine engine, int ownerId, int postId, int offset = 0, boolean publishedOnly = false, boolean friendsOnly = false){
+    static Iterator<Like> getLikes(VKEngine engine, int ownerId, int postId, int offset = 0, boolean publishedOnly = false, boolean friendsOnly = false) {
         new LikeIterator(engine, ownerId, postId, offset, publishedOnly, friendsOnly)
     }
 
@@ -282,8 +283,8 @@ class Wall {
      * @throws IOException
      * @throws VKException
      */
-    static Map<String, Integer> addLike(VKEngine engine, int ownerId, int postId, boolean repost = false, String message = null) throws IOException, VKException{
-        use(DOMCategory){
+    static Map<String, Integer> addLike(VKEngine engine, int ownerId, int postId, boolean repost = false, String message = null) throws IOException, VKException {
+        use(DOMCategory) {
             def response = engine.executeQuery('wall.restoreComment', [
                     owner_id: ownerId,
                     cid: cid
@@ -305,8 +306,8 @@ class Wall {
      * @throws IOException
      * @throws VKException
      */
-    static int deleteLike(VKEngine engine, int ownerId, int postId) throws IOException, VKException{
-        use(DOMCategory){
+    static int deleteLike(VKEngine engine, int ownerId, int postId) throws IOException, VKException {
+        use(DOMCategory) {
             engine.executeQuery('wall.deleteLike', [
                     owner_id: ownerId,
                     postId: postId

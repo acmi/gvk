@@ -3,7 +3,7 @@ package com.vk.api.status
 import com.vk.api.VKCaptchaNeededException
 import com.vk.api.VKEngine
 import com.vk.api.VKException
-import com.vk.api.wall.Identifier
+import com.vk.api.Identifier
 import groovy.transform.Immutable
 import groovy.xml.dom.DOMCategory
 
