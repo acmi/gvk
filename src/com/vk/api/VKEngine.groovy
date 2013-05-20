@@ -2,6 +2,7 @@ package com.vk.api
 
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
+import groovy.util.logging.Log
 import groovy.xml.dom.DOMCategory
 import org.thavam.util.concurrent.BlockingHashMap
 import org.thavam.util.concurrent.BlockingMap
@@ -18,12 +19,15 @@ import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  * @author acmi
  */
 @CompileStatic
 class VKEngine {
+    private static Logger log = Logger.getLogger(VKEngine.class.toString())
+
     private static final String PROTOCOL = 'https'
     private static final String HOST = 'api.vk.com'
     private static final int REQUESTS_PER_SECOND = 3
@@ -77,6 +81,7 @@ class VKEngine {
                 String method = "/method/${request.request.method}${request.request.xml ? '.xml' : ''}?${params.collect { k, v -> "$k=$v" }.join('&')}"
 
                 URL url = new URL(PROTOCOL, HOST, method)
+                log.log(Level.FINE, url.toString())
                 StringBuilder sb = new StringBuilder()
                 try {
                     url.openConnection().inputStream.withReader('UTF-8') { Reader reader ->
@@ -88,6 +93,7 @@ class VKEngine {
                 } catch (Exception e) {
                     response = e
                 }
+                log.log(Level.FINE, '' + response)
                 responses.put(request, response)
             }
         }
@@ -178,10 +184,10 @@ class VKEngine {
         response.toString()
     }
 
-    Element executeQuery(String method, Map params, long timeout = Long.MAX_VALUE, TimeUnit unit = TimeUnit.MILLISECONDS) throws IOException, VKException {
+    Element executeQuery(String method, Map params, long timeout = Long.MAX_VALUE, TimeUnit unit = TimeUnit.MILLISECONDS) throws IOException, VKCaptchaNeededException, VKException {
         long startTime = System.currentTimeMillis()
-        String xmlString = executeQuery(new VKRequest(method, params, true), timeout, unit);
-        Document document = xmlBuilder.parse(new ByteArrayInputStream(xmlString.getBytes()));
+        String xmlString = executeQuery(new VKRequest(method, params, true), timeout, unit)
+        Document document = xmlBuilder.parse(new ByteArrayInputStream(xmlString.getBytes()))
         Element result = document.documentElement
         if (result.tagName == 'error') {
             int errorCode
@@ -195,14 +201,23 @@ class VKEngine {
                 org.w3c.dom.NodeList ps = nl.item(i).getChildNodes()
                 requestParams.put(ps.item(1).getTextContent(), ps.item(3).getTextContent())
             }
+            if (errorCode == VKException.CAPTCHA_NEEDED) {
+                result.getElementsByTagName('captcha_sid').item(0).getTextContent()
+            }
 
             switch (errorCode) {
                 case VKException.USER_AUTHORIZATION_FAILED:
                     removeWorkerByToken(requestParams['access_token'])
                 case VKException.TOO_MANY_REQUESTS_PER_SECOND:
-                    return executeQuery(requestParams['method'], requestParams.findAll { k, v ->
+                    log.log(Level.FINE, errorMsg)
+                    String mthd = requestParams['method']
+                    return executeQuery(mthd.substring(0, mthd.length()-4), requestParams.findAll { k, v ->
                         !['oauth', 'method', 'access_token'].contains(k)
                     }, unit.toMillis(timeout) - System.currentTimeMillis() + startTime, TimeUnit.MILLISECONDS)
+                case VKException.CAPTCHA_NEEDED:
+                    String captchaSid = result.getElementsByTagName('captcha_sid').item(0).getTextContent()
+                    String captchaImg = result.getElementsByTagName('captcha_img').item(0).getTextContent()
+                    throw new VKCaptchaNeededException(errorMsg, requestParams, captchaSid, captchaImg)
                 default: throw new VKException(errorCode, errorMsg, requestParams)
             }
         }
