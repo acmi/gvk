@@ -49,10 +49,10 @@ class CommentIterator extends VKIterator<Comment> {
             ])
             response.comment.each {
                 Comment comment = new Comment(
-                        id: it.cid.text().toInteger(),
-                        user: it.uid.text().toInteger(),
-                        date: new Date(it.date.text().toLong() * 1000),
-                        text: it.text.text()
+                        it.cid.text().toInteger(),
+                        it.uid.text().toInteger(),
+                        new Date(it.date.text().toLong() * 1000),
+                        it.text.text()
                 )
 
                 buffer << comment
