@@ -11,17 +11,17 @@ import org.w3c.dom.Element
  */
 @PackageScope
 class LikeIterator extends VKIterator<Like> {
-    private final Likes.Filter filter 
+    private final Filter filter
 
-    LikeIterator(VKWorker engine, Likes.Type likeType, int ownerId, int itemId, int offset, Likes.Filter filter, boolean friendsOnly) {
+    LikeIterator(VKWorker engine, Type likeType, int ownerId, int itemId, int offset, Filter filter, boolean friendsOnly) {
         super(engine, 'likes.getList', [
                 type: likeType.name(),
                 owner_id: ownerId,
                 item_id: itemId,
                 filter: filter.name(),
-                friends_only: friendsOnly ? 1 : 0  
+                friends_only: friendsOnly ? 1 : 0
         ], offset)
-        
+
         this.filter = filter
 
         bufferSize = friendsOnly ? 100 : 1000

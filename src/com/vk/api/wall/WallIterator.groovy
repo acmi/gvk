@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 @PackageScope
 class WallIterator extends VKIterator<Post> {
 
-    WallIterator(VKWorker engine, int ownerId, int offset, Wall.Filter filter) {
+    WallIterator(VKWorker engine, int ownerId, int offset, Filter filter) {
         super(engine, 'wall.get', [
                 owner_id: ownerId,
                 filter: filter

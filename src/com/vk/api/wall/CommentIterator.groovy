@@ -12,15 +12,15 @@ import org.w3c.dom.Element
 @PackageScope
 class CommentIterator extends VKIterator<Comment> {
 
-    CommentIterator(VKWorker engine, int ownerId, int postId, int offset, Wall.Sort sort) {
+    CommentIterator(VKWorker engine, int ownerId, int postId, int offset, Sort sort) {
         super(engine, 'wall.getComments', [
                 owner_id: ownerId,
                 post_id: postId,
-                sort: sort,
+                sort: sort.name(),
                 need_likes: 0,
                 preview_length: 0,
                 v: 4.4 //v=4.4 для того, чтобы получать аттачи в комментариях в виде объектов, а не ссылок.
-        ],offset)
+        ], offset)
     }
 
     @Override

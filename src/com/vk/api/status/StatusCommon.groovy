@@ -9,29 +9,22 @@ import groovy.xml.dom.DOMCategory
  * @author acmi
  */
 class StatusCommon {
-    private final VKWorker worker
-
-    StatusCommon(VKWorker worker) {
-        this.worker = worker
-    }
-
-    protected VKWorker getWorker() { worker }
-
     /**
      * Получает текст статуса пользователя.
      *
-     * @param uid
+     * @param worker VKWorker
+     * @param uid идентификатор пользователя, статус которого необходимо получить.
      * @return В случае успеха возвращает объект, у которого в поле text содержится текст статуса пользователя.
      * @throws IOException
      * @throws VKException
      */
-    Status get(int uid) throws IOException, VKException{
-          use(DOMCategory){
-              def response = worker.executeQuery(new VKRequest('status.get', [uid: uid]))
+    static Status get(VKWorker worker, int uid) throws IOException, VKException {
+        use(DOMCategory) {
+            def response = worker.executeQuery(new VKRequest('status.get', [uid: uid]))
 
-              new Status(
-                      response.text.text()
-              )
-          }
+            new Status(
+                    response.text.text()
+            )
+        }
     }
 }

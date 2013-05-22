@@ -1,27 +1,28 @@
 package com.vk.api
 
-import com.vk.api.groups.GroupsFull
-import com.vk.api.likes.LikesFull
-import com.vk.api.status.StatusFull
-import com.vk.api.users.UsersFull
-import com.vk.api.wall.WallFull
 import groovy.transform.Canonical
 import groovy.transform.CompileStatic
-import org.w3c.dom.*
+import org.w3c.dom.Document
+import org.w3c.dom.Element
+import org.w3c.dom.NodeList
 import org.xml.sax.SAXException
 
-import javax.xml.parsers.*
-import java.io.*
-import java.util.*
-import java.util.concurrent.*
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.parsers.ParserConfigurationException
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.logging.*
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  * @author acmi
  */
 @CompileStatic
-public final class VKWorkerUser implements VKWorker {
+final class VKWorkerUser implements VKWorker {
     private static final Logger log = Logger.getLogger(VKWorkerUser.class.getName())
 
     private static final String PROTOCOL = "https"
@@ -37,13 +38,7 @@ public final class VKWorkerUser implements VKWorker {
 
     private final DocumentBuilder xmlBuilder
 
-//    final UsersFull users = new UsersFull(this)
-//    final GroupsFull groups = new GroupsFull(this)
-//    final LikesFull likes = new LikesFull(this)
-//    final WallFull wall = new WallFull(this)
-//    final StatusFull status = new StatusFull(this)
-
-    public VKWorkerUser(int userId, String token) {
+    VKWorkerUser(int userId, String token) {
         this.userId = userId
         this.token = token
 
@@ -57,7 +52,7 @@ public final class VKWorkerUser implements VKWorker {
 
     }
 
-    public synchronized void start() {
+    synchronized void start() {
         executionTimer = new Timer()
         executionTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -90,25 +85,6 @@ public final class VKWorkerUser implements VKWorker {
 
                     response = connection.inputStream.getText('UTF-8')
 
-//                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"))
-//                    StringBuilder sb = new StringBuilder()
-//                    String line
-//                    try {
-//                        while ((line = in.readLine()) != null) {
-//                            sb.append(line)
-//                        }
-//                    } catch (IOException ioe) {
-//                        try {
-//                            Reader err = new InputStreamReader(connection.getErrorStream())
-//                            while (err.read() != -1) {
-//                            }
-//                        } catch (IOException ignored) {
-//                        }
-//                        throw ioe
-//                    }
-//
-//                    response = sb.toString()
-
                     log.log(Level.FINE, response.toString())
                 } catch (Exception e) {
                     response = e
@@ -120,7 +96,7 @@ public final class VKWorkerUser implements VKWorker {
         }, 0, WAIT_TIME_MILLIS)
     }
 
-    public synchronized void stop() {
+    synchronized void stop() {
         if (executionTimer != null) {
             executionTimer.cancel()
             executionTimer = null
@@ -144,7 +120,7 @@ public final class VKWorkerUser implements VKWorker {
     }
 
     @Override
-    public Element executeQuery(VKRequest request) throws IOException, VKException, InterruptedException, SAXException {
+    Element executeQuery(VKRequest request) throws IOException, VKException, InterruptedException, SAXException {
         String xmlString = _executeQuery(request)
         Document document = xmlBuilder.parse(new ByteArrayInputStream(xmlString.getBytes()))
         Element result = document.getDocumentElement()
@@ -173,7 +149,7 @@ public final class VKWorkerUser implements VKWorker {
         return result
     }
 
-    private static class ObjectHolder<V>{
+    private static class ObjectHolder<V> {
         private final CountDownLatch latch = new CountDownLatch(1)
         private final AtomicBoolean isSet = new AtomicBoolean()
         private V slot
