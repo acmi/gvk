@@ -1,56 +1,35 @@
 package com.vk.api.likes
 
-import com.vk.api.VKEngine
 import com.vk.api.VKIterator
+import com.vk.api.VKWorker
 import groovy.transform.PackageScope
 import groovy.xml.dom.DOMCategory
+import org.w3c.dom.Element
 
 /**
  * @author acmi
  */
 @PackageScope
 class LikeIterator extends VKIterator<Like> {
-    private Likes.Type type
-    private int ownerId
-    private int itemId
-    private Likes.Filter filter
-    private boolean friendsOnly
+    private final Likes.Filter filter 
 
-    LikeIterator(VKEngine engine, Likes.Type likeType, int ownerId, int itemId, int offset, Likes.Filter filter, boolean friendsOnly) {
-        super(engine, offset)
-        this.type = likeType
-        this.ownerId = ownerId
-        this.itemId = itemId
+    LikeIterator(VKWorker engine, Likes.Type likeType, int ownerId, int itemId, int offset, Likes.Filter filter, boolean friendsOnly) {
+        super(engine, 'likes.getList', [
+                type: likeType.name(),
+                owner_id: ownerId,
+                item_id: itemId,
+                filter: filter.name(),
+                friends_only: friendsOnly ? 1 : 0  
+        ], offset)
+        
         this.filter = filter
-        this.friendsOnly = friendsOnly
+
+        bufferSize = friendsOnly ? 100 : 1000
     }
 
     @Override
-    protected int getCount() {
+    protected void fillBuffer(Element response) {
         use(DOMCategory) {
-            engine.executeQuery('likes.getList', [
-                    type: type.name(),
-                    owner_id: ownerId,
-                    item_id: itemId,
-                    filter: filter.name(),
-                    friends_only: friendsOnly ? 1 : 0,
-                    count: 1
-            ]).count.text().toInteger()
-        }
-    }
-
-    @Override
-    protected void fillBuffer() {
-        use(DOMCategory) {
-            def response = engine.executeQuery('likes.getList', [
-                    type: type.name(),
-                    owner_id: ownerId,
-                    item_id: itemId,
-                    filter: filter.name(),
-                    friends_only: friendsOnly ? 1 : 0,
-                    offset: offset + getProcessed(),
-                    count: friendsOnly ? 100 : 1000
-            ])
             response.users.uid.each {
                 Like like = new Like(
                         it.text().toInteger(),
@@ -60,10 +39,5 @@ class LikeIterator extends VKIterator<Like> {
                 buffer << like
             }
         }
-    }
-
-    @Override
-    void remove() {
-        throw new UnsupportedOperationException()
     }
 }

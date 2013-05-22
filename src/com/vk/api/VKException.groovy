@@ -1,8 +1,11 @@
 package com.vk.api
 
+import groovy.transform.CompileStatic
+
 /**
  * @author acmi
  */
+@CompileStatic
 class VKException extends Exception{
     final Integer code
     final Map<String, String> requestParams = [:]

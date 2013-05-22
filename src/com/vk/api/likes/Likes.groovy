@@ -1,25 +1,28 @@
 package com.vk.api.likes
 
-import com.vk.api.VKEngine
+import com.vk.api.VKWorker
 import com.vk.api.VKException
+import groovy.transform.PackageScope
+import groovy.transform.PackageScopeTarget
 import groovy.xml.dom.DOMCategory
 
 /**
  * @author acmi
  */
+@PackageScope([PackageScopeTarget.METHODS])
 class Likes {
     /**
      * Добавляет указанный объект в список Мне нравится текущего пользователя.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param ownerId идентификатор владельца Like-объекта. В случае записей и комментариев на стене ownerId равен идентификатору страницы со стеной, а не автору записи.
      * @param type идентификатор типа Like-объекта.
      * @param itemId идентификатор Like-объекта.
      * @return В случае успеха возвращает текущее количество пользователей, которые добавили данный объект в свой список Мне нравится.
      * @throws IOException
-     * @throws VKException
+     * @throws com.vk.api.VKException
      */
-    static Integer add(VKEngine engine, int ownerId, Type type, int itemId) throws IOException, VKException {
+    static Integer add(VKWorker engine, int ownerId, Type type, int itemId) throws IOException, VKException {
         use(DOMCategory) {
             engine.executeQuery('likes.add', [
                     owner_id: ownerId,
@@ -32,15 +35,15 @@ class Likes {
     /**
      * Удаляет указанный объект из списка Мне нравится текущего пользователя.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param ownerId идентификатор владельца Like-объекта.
      * @param type идентификатор типа Like-объекта.
      * @param itemId идентификатор Like-объекта.
      * @return В случае успеха возвращает текущее количество пользователей, которые добавили данный объект в свой список Мне нравится.
      * @throws IOException
-     * @throws VKException
+     * @throws com.vk.api.VKException
      */
-    static Integer delete(VKEngine engine, int ownerId, Type type, int itemId) throws IOException, VKException {
+    static Integer delete(VKWorker engine, int ownerId, Type type, int itemId) throws IOException, VKException {
         use(DOMCategory) {
             engine.executeQuery('likes.delete', [
                     owner_id: ownerId,
@@ -53,7 +56,7 @@ class Likes {
     /**
      * Получает список идентификаторов пользователей, которые добавили заданный объект в свой список Мне нравится.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param likeType тип Like-объекта.
      * @param ownerId дентификатор владельца Like-объекта (id пользователя или id приложения). Если параметр type равен sitepage, то в качестве owner_id необходимо передавать id приложения. Если параметр не задан, то считается, что он равен либо идентификатору текущего пользователя, либо идентификатору текущего приложения (если type равен sitepage).
      * @param itemId идентификатор Like-объекта. Если type равен sitepage, то параметр item_id может содержать значение параметра page_id, используемый при инициализации виджета «Мне нравится».
@@ -62,22 +65,22 @@ class Likes {
      * @param friendsOnly указывает, необходимо ли возвращать только пользователей, которые являются друзьями текущего пользователя.
      * @return Итератор Like
      */
-    static Iterator<Like> getList(VKEngine engine, Type likeType, int ownerId, int itemId, int offset = 0, Filter filter = Filter.likes, boolean friendsOnly = false) {
+    static Iterator<Like> getList(VKWorker engine, Type likeType, int ownerId, int itemId, int offset = 0, Filter filter = Filter.likes, boolean friendsOnly = false) {
         new LikeIterator(engine, likeType, ownerId, itemId, offset, filter, friendsOnly)
     }
 
     /**
      * Проверяет находится ли объект в списке Мне нравится заданного пользователя.
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param userId идентификатор пользователя у которого необходимо проверить наличие объекта в списке Мне нравится.
      * @param ownerId идентификатор владельца Like-объекта.
      * @param type идентификатор типа Like-объекта.
      * @param itemId идентификатор Like-объекта.
      * @return указанный Like-объект находится в списке Мне нравится пользователя с идентификатором userId
      * @throws IOException
-     * @throws VKException
+     * @throws com.vk.api.VKException
      */
-    static Boolean isLiked(VKEngine engine, int userId, int ownerId, Type type, int itemId) throws IOException, VKException {
+    static Boolean isLiked(VKWorker engine, int userId, int ownerId, Type type, int itemId) throws IOException, VKException {
         use(DOMCategory) {
             engine.executeQuery('likes.isLiked', [
                     user_id: userId,

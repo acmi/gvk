@@ -1,9 +1,11 @@
 package com.vk.api.wall
 
 import com.vk.api.Identifier
-import com.vk.api.VKEngine
+import com.vk.api.VKWorker
 import com.vk.api.VKException
 import com.vk.api.likes.Like
+import groovy.transform.PackageScope
+import groovy.transform.PackageScopeTarget
 import groovy.xml.dom.DOMCategory
 
 import java.util.concurrent.TimeUnit
@@ -11,18 +13,19 @@ import java.util.concurrent.TimeUnit
 /**
  * @author acmi
  */
+@PackageScope([PackageScopeTarget.METHODS])
 class Wall {
     /**
      * Возвращает список записей со стены пользователя или сообщества.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param ownerId идентификатор пользователя. Чтобы получить записи со стены группы (публичной страницы, встречи), укажите её идентификатор со знаком "минус": например, ownerId=-1 соответствует группе с идентификатором 1.
      * @param offset смещение, необходимое для выборки определенного подмножества сообщений.
      * @param filter определяет, какие типы сообщений на стене необходимо получить. Если параметр не задан, то считается, что он равен <b>all</b>.
      * @return Итератор постов
      * @exception RuntimeException ( wrapped IOException , VKException )
      */
-    static Iterator<Post> get(VKEngine engine, int ownerId, int offset = 0, Filter filter = Filter.all) {
+    static Iterator<Post> get(VKWorker engine, int ownerId, int offset = 0, Filter filter = Filter.all) {
         new WallIterator(engine, ownerId, offset, filter)
     }
 
@@ -35,13 +38,13 @@ class Wall {
     /**
      * Возвращает список записей со стен пользователей по их идентификаторам.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param posts перечисленные через запятую идентификаторы, которые представляют собой идущие через знак подчеркивания id владельцев стен и id самих записей на стене. Пример: 93388_21539,93388_20904,2943_4276
      * @return Итератор постов
      * @throws IOException
-     * @throws VKException
+     * @throws com.vk.api.VKException
      */
-    static Iterator<Post> getById(VKEngine engine, List<Identifier> posts) throws IOException, VKException {
+    static Iterator<Post> getById(VKWorker engine, List<Identifier> posts) throws IOException, VKException {
         use(DOMCategory) {
             Map params = [:]
             if (posts?.size() > 0)
@@ -62,7 +65,7 @@ class Wall {
     /**
      * Публикует новую запись на своей или чужой стене.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param ownerId идентификатор пользователя, у которого должна быть опубликована запись.
      * @param message текст сообщения (является обязательным, если не задан параметр <b>attachments</b>)
      * @param attachments Параметр является обязательным, если не задан параметр <b>message</b>.
@@ -75,9 +78,9 @@ class Wall {
      * @param friendsOnly Статус будет доступен только друзьям, иначе всем пользователям.
      * @return Идентификатор созданной записи.
      * @throws IOException
-     * @throws VKException
+     * @throws com.vk.api.VKException
      */
-    static Integer post(VKEngine engine, int ownerId, String message, List<Identifier> attachments = null, int lat = 0, int lng = 0, int placeId = 0, List services = null, boolean fromGroup = false, boolean signed = false, boolean friendsOnly = false) throws IOException, VKException {
+    static Integer post(VKWorker engine, int ownerId, String message, List<Identifier> attachments = null, int lat = 0, int lng = 0, int placeId = 0, List services = null, boolean fromGroup = false, boolean signed = false, boolean friendsOnly = false) throws IOException, VKException {
         use(DOMCategory) {
             Map params = [
                     owner_id: ownerId,
@@ -102,7 +105,7 @@ class Wall {
     /**
      * Редактирует запись на своей или чужой стене.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param ownerId идентификатор пользователя, на чьей стене находится запись, которую необходимо отредактировать.
      * @param postId идентификатор записи на стене пользователя.
      * @param message текст сообщения (является обязательным, если не задан параметр <b>attachments</b>)
@@ -112,9 +115,9 @@ class Wall {
      * @param placeId идентификатор места, в котором отмечен пользователь
      * @return В случае успешного сохранения записи метод возвратит true.
      * @throws IOException
-     * @throws VKException
+     * @throws com.vk.api.VKException
      */
-    static boolean edit(VKEngine engine, int ownerId, int postId, String message, List<Identifier> attachments = null, int lat = 0, int lng = 0, int placeId = 0) throws IOException, VKException {
+    static boolean edit(VKWorker engine, int ownerId, int postId, String message, List<Identifier> attachments = null, int lat = 0, int lng = 0, int placeId = 0) throws IOException, VKException {
         use(DOMCategory) {
             Map params = [
                     owner_id: ownerId,
@@ -134,14 +137,14 @@ class Wall {
     /**
      * Удаляет запись со стены пользователя.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param ownerId идентификатор пользователя, на чьей стене необходимо удалить запись.
      * @param postId идентификатор записи на стене пользователя.
      * @return В случае успешного удаления записи со стены пользователя возвращает true.
      * @throws IOException
-     * @throws VKException
+     * @throws com.vk.api.VKException
      */
-    static boolean delete(VKEngine engine, int ownerId, int postId) throws IOException, VKException {
+    static boolean delete(VKWorker engine, int ownerId, int postId) throws IOException, VKException {
         use(DOMCategory) {
             engine.executeQuery('wall.delete', [
                     owner_id: ownerId,
@@ -153,14 +156,14 @@ class Wall {
     /**
      * Восстанавливает удаленную запись на стене пользователя.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param ownerId идентификатор пользователя, на чьей стене необходимо удалить запись.
      * @param postId идентификатор записи на стене пользователя.
      * @return В случае успешного восстановления записи на стене пользователя возвращает true.
      * @throws IOException
-     * @throws VKException
+     * @throws com.vk.api.VKException
      */
-    static boolean restore(VKEngine engine, int ownerId, int postId) throws IOException, VKException {
+    static boolean restore(VKWorker engine, int ownerId, int postId) throws IOException, VKException {
         use(DOMCategory) {
             engine.executeQuery('wall.restore', [
                     owner_id: ownerId,
@@ -172,7 +175,7 @@ class Wall {
     /**
      * Возвращает список комментариев к записи на стене пользователя.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param ownerId идентификатор пользователя, на чьей стене находится запись, к которой необходимо получить комментарии.
      * @param postId идентификатор записи на стене пользователя.
      * @param offset смещение, необходимое для выборки определенного подмножества комментариев.
@@ -180,7 +183,7 @@ class Wall {
      * @return Итератор комментариев
      * @exception RuntimeException ( wrapped IOException , VKException )
      */
-    static Iterator<Comment> getComments(VKEngine engine, int ownerId, int postId, int offset = 0, Sort sort = Sort.asc) {
+    static Iterator<Comment> getComments(VKWorker engine, int ownerId, int postId, int offset = 0, Sort sort = Sort.asc) {
         new CommentIterator(engine, ownerId, postId, offset, sort)
     }
 
@@ -192,7 +195,7 @@ class Wall {
     /**
      * Добавляет комментарий к записи на стене пользователя.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param ownerId идентификатор пользователя, на чьей стене находится запись к которой необходимо добавить комментарий.
      * @param postId идентификатор записи на стене пользователя.
      * @param text текст комментария к записи на стене пользователя.
@@ -200,9 +203,9 @@ class Wall {
      * @param attachments список объектов, приложенных к комментарию и разделённых символом ",".Параметр является обязательным, если не задан параметр {@code text}.
      * @return В случае успешного добавления комментария к записи возвращает идентификатор добавленного комментария на стене пользователя.
      * @throws IOException
-     * @throws VKException
+     * @throws com.vk.api.VKException
      */
-    static int addComment(VKEngine engine, int ownerId, int postId, String text, int replyToCid = 0, List<Identifier> attachments = null) throws IOException, VKException {
+    static int addComment(VKWorker engine, int ownerId, int postId, String text, int replyToCid = 0, List<Identifier> attachments = null) throws IOException, VKException {
         use(DOMCategory) {
             Map params = [
                     owner_id: ownerId,
@@ -220,14 +223,14 @@ class Wall {
     /**
      * Удаляет комментарий текущего пользователя к записи на своей или чужой стене.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param ownerId идентификатор пользователя, на чьей стене находится комментарий к записи.
      * @param cid идентификатор комментария на стене пользователя.
      * @return В случае успеха возвращает true.
      * @throws IOException
-     * @throws VKException
+     * @throws com.vk.api.VKException
      */
-    static boolean deleteComment(VKEngine engine, int ownerId, int cid) throws IOException, VKException {
+    static boolean deleteComment(VKWorker engine, int ownerId, int cid) throws IOException, VKException {
         use(DOMCategory) {
             engine.executeQuery('wall.deleteComment', [
                     owner_id: ownerId,
@@ -239,14 +242,14 @@ class Wall {
     /**
      * Восстанавливает комментарий текущего пользователя к записи на своей или чужой стене.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param ownerId идентификатор пользователя, на чьей стене находится комментарий к записи.
      * @param cid идентификатор комментария на стене пользователя.
      * @return В случае успеха возвращает true.
      * @throws IOException
-     * @throws VKException
+     * @throws com.vk.api.VKException
      */
-    static boolean restoreComment(VKEngine engine, int ownerId, int cid) throws IOException, VKException {
+    static boolean restoreComment(VKWorker engine, int ownerId, int cid) throws IOException, VKException {
         use(DOMCategory) {
             engine.executeQuery('wall.restoreComment', [
                     owner_id: ownerId,
@@ -258,7 +261,7 @@ class Wall {
     /**
      * Получает информацию о пользователях, которые добавили указанную запись в свой список <b>Мне нравится</b>. Список пользователей отсортирован в порядке убывания добавления записи в список <b>Мне нравится</b>.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param ownerId идентификатор пользователя, на чьей стене находится запись.
      * @param postId идентификатор записи на стене пользователя.
      * @param offset смещение, относительно начала списка, для выборки определенного подмножества.
@@ -267,23 +270,23 @@ class Wall {
      * @return Итератор лайков
      * @exception RuntimeException ( wrapped IOException , VKException )
      */
-    static Iterator<Like> getLikes(VKEngine engine, int ownerId, int postId, int offset = 0, boolean publishedOnly = false, boolean friendsOnly = false) {
+    static Iterator<Like> getLikes(VKWorker engine, int ownerId, int postId, int offset = 0, boolean publishedOnly = false, boolean friendsOnly = false) {
         new LikeIterator(engine, ownerId, postId, offset, publishedOnly, friendsOnly)
     }
 
     /**
      * Добавляет запись на стене пользователя в список <b>Мне нравится</b>, а также создает копию понравившейся записи на стене текущего пользователя при необходимости.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param ownerId идентификатор пользователя, на чьей стене находится запись, которую необходимо добавить в список <b>Мне нравится</b>.
      * @param postId идентификатор сообщения на стене пользователя, которое необходимо добавить в список <b>Мне нравится</b>.
      * @param repost определяет, необходимо ли опубликовать запись, которая заносится в список <b>Мне нравится</b>, на стене текущего пользователя. Публикация возможна только для записей, находящихся на чужих стенах.
      * @param message комментарий к записи, публикуемой на своей странице (при использовании параметра repost). По умолчанию комментарий к записи не добавляется.
      * @return В случае успешного добавления сообщения в список Мне нравится возвращает Map с ключами likes и reposts, по которым находится текущее количество человек, которые добавили данное сообщение в свой список Мне нравится и количество человек, опубликовавших запись на своих страницах.
      * @throws IOException
-     * @throws VKException
+     * @throws com.vk.api.VKException
      */
-    static Map<String, Integer> addLike(VKEngine engine, int ownerId, int postId, boolean repost = false, String message = null) throws IOException, VKException {
+    static Map<String, Integer> addLike(VKWorker engine, int ownerId, int postId, boolean repost = false, String message = null) throws IOException, VKException {
         use(DOMCategory) {
             def response = engine.executeQuery('wall.restoreComment', [
                     owner_id: ownerId,
@@ -299,14 +302,14 @@ class Wall {
     /**
      * Удаляет запись на стене пользователя из списка Мне нравится.
      *
-     * @param engine VKEngine
+     * @param engine VKWorker
      * @param ownerId идентификатор пользователя, на чьей стене находится запись, которую необходимо удалить из списка Мне нравится.
      * @param postId идентификатор сообщения на стене пользователя, которое необходимо удалить из списка Мне нравится.
      * @return В случае успешного удаления сообщения из списка Мне нравится возвращает текущее количество человек, которые добавили данное сообщение в свой список Мне нравится.
      * @throws IOException
-     * @throws VKException
+     * @throws com.vk.api.VKException
      */
-    static int deleteLike(VKEngine engine, int ownerId, int postId) throws IOException, VKException {
+    static int deleteLike(VKWorker engine, int ownerId, int postId) throws IOException, VKException {
         use(DOMCategory) {
             engine.executeQuery('wall.deleteLike', [
                     owner_id: ownerId,

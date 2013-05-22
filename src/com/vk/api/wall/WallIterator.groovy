@@ -1,9 +1,10 @@
 package com.vk.api.wall
 
-import com.vk.api.VKEngine
 import com.vk.api.VKIterator
+import com.vk.api.VKWorker
 import groovy.transform.PackageScope
 import groovy.xml.dom.DOMCategory
+import org.w3c.dom.Element
 
 import java.util.concurrent.TimeUnit
 
@@ -12,36 +13,18 @@ import java.util.concurrent.TimeUnit
  */
 @PackageScope
 class WallIterator extends VKIterator<Post> {
-    private int ownerId
-    private Wall.Filter filter
 
-    WallIterator(VKEngine engine, int ownerId, int offset, Wall.Filter filter) {
-        super(engine, offset)
-
-        this.ownerId = ownerId
-        this.filter = filter != null ? filter : WallFilter.all
+    WallIterator(VKWorker engine, int ownerId, int offset, Wall.Filter filter) {
+        super(engine, 'wall.get', [
+                owner_id: ownerId,
+                filter: filter
+        ], offset)
     }
 
     @Override
-    protected int getCount() {
+    protected void fillBuffer(Element response) throws Exception {
         use(DOMCategory) {
-            engine.executeQuery('wall.get', [
-                    owner_id: ownerId,
-                    count: 1,
-                    filter: filter.name()]).count.text().toInteger()
-        }
-    }
-
-    @Override
-    protected void fillBuffer() {
-        use(DOMCategory) {
-            def wall = engine.executeQuery('wall.get', [
-                    owner_id: ownerId,
-                    offset: offset + getProcessed(),
-                    count: 100,
-                    filter: filter.name()
-            ])
-            wall.post.each {
+            response.post.each {
                 Post post = new Post(
                         new Date(TimeUnit.SECONDS.toMillis(it.date.text().toLong())),
                         it.text.text(),
