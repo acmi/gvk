@@ -13,9 +13,9 @@ import org.w3c.dom.Element;
 interface VKWorker {
     Element executeQuery(VKRequest request) throws Exception
 
-    UsersCommon getUsers()
-    GroupsCommon getGroups()
-    LikesCommon getLikes()
-    WallCommon getWall()
-    StatusCommon getStatus()
+//    UsersCommon getUsers()
+//    GroupsCommon getGroups()
+//    LikesCommon getLikes()
+//    WallCommon getWall()
+//    StatusCommon getStatus()
 }

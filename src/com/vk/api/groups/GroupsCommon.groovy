@@ -26,4 +26,19 @@ class GroupsCommon {
     Iterator<Group> getById(List gids) throws IOException, VKException{
         Groups.getById(worker, gids)
     }
+
+    /**
+     * Возвращает информацию о заданной группе
+     *
+     * @param gid ID группы, информацию о которой необходимо получить. В качестве ID может быть использовано короткое имя группы.
+     * @return
+     * @throws IOException
+     * @throws VKException
+     */
+    Group getById(gid) throws IOException, VKException{
+        Iterator<Group> it = getById([gid])
+        if (it.hasNext())
+            return it.next()
+        null
+    }
 }

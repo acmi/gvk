@@ -37,11 +37,11 @@ public final class VKWorkerUser implements VKWorker {
 
     private final DocumentBuilder xmlBuilder
 
-    final UsersFull users = new UsersFull(this)
-    final GroupsFull groups = new GroupsFull(this)
-    final LikesFull likes = new LikesFull(this)
-    final WallFull wall = new WallFull(this)
-    final StatusFull status = new StatusFull(this)
+//    final UsersFull users = new UsersFull(this)
+//    final GroupsFull groups = new GroupsFull(this)
+//    final LikesFull likes = new LikesFull(this)
+//    final WallFull wall = new WallFull(this)
+//    final StatusFull status = new StatusFull(this)
 
     public VKWorkerUser(int userId, String token) {
         this.userId = userId
@@ -108,6 +108,8 @@ public final class VKWorkerUser implements VKWorker {
 //                    }
 //
 //                    response = sb.toString()
+
+                    log.log(Level.FINE, response.toString())
                 } catch (Exception e) {
                     response = e
                 }

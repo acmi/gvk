@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 /**
  * @author acmi
  */
-@PackageScope([PackageScopeTarget.METHODS])
+//@PackageScope([PackageScopeTarget.METHODS])
 class Wall {
     /**
      * Возвращает список записей со стены пользователя или сообщества.

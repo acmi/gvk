@@ -6,6 +6,7 @@ import com.vk.api.VKWorker
 import groovy.transform.PackageScope
 import groovy.transform.PackageScopeTarget
 import groovy.xml.dom.DOMCategory
+import org.w3c.dom.Element
 
 /**
  * @author acmi
@@ -23,15 +24,15 @@ class Groups {
      */
     static Iterator<Group> getById(VKWorker worker, List gids) throws IOException, VKException{
         use(DOMCategory) {
-            def response = worker.executeQuery(new VKRequest('groups.getById', [
+            Element response = worker.executeQuery(new VKRequest('groups.getById', [
                     gids: gids.join(','),
-//                    fields: fields.join(',')
+//                    fields: ['gid', 'name', 'screen_name'].join(',')
             ]))
-            response.group.collect {
+            response.group.collect {Element group->
                 new Group(
-                        it.gid.text().toInteger(),
-                        it.name.text(),
-                        it.screen_name.text()
+                        group.gid.text().toInteger(),
+                        group.get('name').text(),
+                        group.screen_name.text()
 
                 )
             }.iterator()
