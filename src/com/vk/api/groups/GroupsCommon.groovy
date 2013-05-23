@@ -1,8 +1,8 @@
 package com.vk.api.groups
 
-import com.vk.api.VKException
-import com.vk.api.VKRequest
-import com.vk.api.VKWorker
+import com.vk.worker.VKAnonymousWorker
+import com.vk.worker.VKException
+import com.vk.worker.VKRequest
 import groovy.xml.dom.DOMCategory
 import org.w3c.dom.Element
 
@@ -18,7 +18,7 @@ class GroupsCommon {
      * @throws IOException
      * @throws VKException
      */
-    static Iterator<Group> getById(VKWorker worker, List gids) throws IOException, VKException {
+    static Iterator<Group> getById(VKAnonymousWorker worker, List gids) throws IOException, VKException {
         use(DOMCategory) {
             Element response = worker.executeQuery(new VKRequest('groups.getById', [
                     gids: gids.join(','),
@@ -43,7 +43,7 @@ class GroupsCommon {
      * @throws IOException
      * @throws VKException
      */
-    static Group getById(VKWorker worker, gid) throws IOException, VKException {
+    static Group getById(VKAnonymousWorker worker, gid) throws IOException, VKException {
         Iterator<Group> it = getById(worker, [gid])
         if (it.hasNext())
             return it.next()

@@ -1,4 +1,4 @@
-package com.vk.api
+package com.vk.worker
 
 import groovy.transform.CompileStatic
 
@@ -6,11 +6,11 @@ import groovy.transform.CompileStatic
  * @author acmi
  */
 @CompileStatic
-class VKException extends Exception{
-    final Integer code
+class VKException extends Exception {
+    final int code
     final Map<String, String> requestParams = [:]
 
-    VKException(Integer code, String message, Map requestParams){
+    VKException(int code, String message, Map requestParams) {
         super(message)
         this.code = code
         this.requestParams.putAll(requestParams)

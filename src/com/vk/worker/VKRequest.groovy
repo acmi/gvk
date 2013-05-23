@@ -1,4 +1,4 @@
-package com.vk.api
+package com.vk.worker
 
 import groovy.transform.Immutable
 

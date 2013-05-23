@@ -1,10 +1,10 @@
-package com.vk.api
+package com.vk.worker
 
 import org.w3c.dom.Element
 
 /**
  * @author acmi
  */
-interface VKWorker {
+interface VKAnonymousWorker {
     Element executeQuery(VKRequest request) throws Exception
 }

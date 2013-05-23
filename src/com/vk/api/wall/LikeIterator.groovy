@@ -1,8 +1,8 @@
 package com.vk.api.wall
 
 import com.vk.api.VKIterator
-import com.vk.api.VKWorker
 import com.vk.api.likes.Like
+import com.vk.worker.VKAnonymousWorker
 import groovy.transform.PackageScope
 import groovy.xml.dom.DOMCategory
 import org.w3c.dom.Element
@@ -14,7 +14,7 @@ import org.w3c.dom.Element
 class LikeIterator extends VKIterator<Like> {
     private final boolean publishedOnly
 
-    LikeIterator(VKWorker engine, int ownerId, int postId, int offset, boolean publishedOnly, boolean friendsOnly) {
+    LikeIterator(VKAnonymousWorker engine, int ownerId, int postId, int offset, boolean publishedOnly, boolean friendsOnly) {
         super(engine, 'wall.getLikes', [
                 owner_id: ownerId,
                 post_id: postId,

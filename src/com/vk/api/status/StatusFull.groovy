@@ -1,9 +1,9 @@
 package com.vk.api.status
 
 import com.vk.api.Identifier
-import com.vk.api.VKException
-import com.vk.api.VKRequest
-import com.vk.api.VKWorkerUser
+import com.vk.worker.VKException
+import com.vk.worker.VKIdentifiedWorker
+import com.vk.worker.VKRequest
 import groovy.xml.dom.DOMCategory
 
 /**
@@ -13,17 +13,17 @@ class StatusFull extends StatusCommon {
     /**
      * Получает текст статуса пользователя.
      *
-     * @param worker VKWorker
+     * @param worker VKAnonymousWorker
      * @param uid идентификатор пользователя, статус которого необходимо получить. Если параметр не задан, то считается, что он равен идентификатору текущего пользователя.
      * @return В случае успеха возвращает объект, у которого в поле text содержится текст статуса пользователя.
      * @throws IOException
      * @throws VKException
      */
-    static Status get(VKWorkerUser worker, int uid = worker.userId) throws IOException, VKException {
+    static Status get(VKIdentifiedWorker worker, int uid = worker.userId) throws IOException, VKException {
         StatusCommon.get(worker, uid)
     }
 
-    static Boolean set(VKWorkerUser worker, String text = null, Identifier audio = null) {
+    static Boolean set(VKIdentifiedWorker worker, String text = null, Identifier audio = null) {
         use(DOMCategory) {
             worker.executeQuery(new VKRequest('status.set', [
                     text: text,

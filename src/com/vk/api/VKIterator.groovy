@@ -1,21 +1,23 @@
 package com.vk.api
 
+import com.vk.worker.VKAnonymousWorker
+import com.vk.worker.VKRequest
 import groovy.xml.dom.DOMCategory
 import org.w3c.dom.Element
 
 abstract class VKIterator<T> implements Iterator<T> {
-    protected final VKWorker engine
+    protected final VKAnonymousWorker engine
     protected final int offset
 
     protected final String method
     protected final Map params = [:]
 
-    protected int count = -1
+    protected Integer count
     private int processed
     protected int bufferSize = 100
     protected final Queue<T> buffer = new LinkedList<T>()
 
-    public VKIterator(VKWorker engine, String method, Map params, int offset) {
+    public VKIterator(VKAnonymousWorker engine, String method, Map params, int offset) {
         this.engine = engine
         this.method = method
         this.params = params.collectEntries { k, v ->
@@ -31,13 +33,9 @@ abstract class VKIterator<T> implements Iterator<T> {
 
     @Override
     public boolean hasNext() {
-        if (count == -1) {
+        if (count == null) {
             try {
-                use(DOMCategory) {
-                    Map params = new HashMap(this.params)
-                    params['count'] = 1
-                    count = engine.executeQuery(new VKRequest(method, params)).count.text().toInteger()
-                }
+                count = getCount()
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -58,6 +56,14 @@ abstract class VKIterator<T> implements Iterator<T> {
             }
         processed++
         return buffer.poll()
+    }
+
+    protected int getCount() throws Exception {
+        use(DOMCategory) {
+            Map params = new HashMap(this.params)
+            params['count'] = 1
+            count = engine.executeQuery(new VKRequest(method, params)).count.text().toInteger()
+        }
     }
 
     protected abstract void fillBuffer(Element response) throws Exception

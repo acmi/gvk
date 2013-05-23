@@ -11,7 +11,7 @@ class Identifier {
     int mediaId
     Type type
 
-    String toString(boolean showType){
+    String toString(boolean showType) {
         "${showType ? type.name() : ''}${ownerId}_${mediaId}"
     }
 
@@ -20,8 +20,9 @@ class Identifier {
         toString(true)
     }
 
-    static enum Type{
+    static enum Type {
         post,
+        comment,
         photo,
         video,
         audio,

@@ -1,8 +1,8 @@
 package com.vk.api.likes
 
-import com.vk.api.VKException
-import com.vk.api.VKRequest
-import com.vk.api.VKWorkerUser
+import com.vk.worker.VKException
+import com.vk.worker.VKIdentifiedWorker
+import com.vk.worker.VKRequest
 import groovy.xml.dom.DOMCategory
 
 /**
@@ -20,7 +20,7 @@ class LikesFull extends LikesCommon {
      * @throws IOException
      * @throws VKException
      */
-    static Integer add(VKWorkerUser worker, int ownerId = worker.userId, Type type, int itemId) throws IOException, VKException {
+    static Integer add(VKIdentifiedWorker worker, int ownerId = worker.userId, Type type, int itemId) throws IOException, VKException {
         use(DOMCategory) {
             worker.executeQuery(new VKRequest('likes.add', [
                     owner_id: ownerId,
@@ -41,7 +41,7 @@ class LikesFull extends LikesCommon {
      * @throws IOException
      * @throws VKException
      */
-    static Integer delete(VKWorkerUser worker, int ownerId = worker.userId, Type type, int itemId) throws IOException, VKException {
+    static Integer delete(VKIdentifiedWorker worker, int ownerId = worker.userId, Type type, int itemId) throws IOException, VKException {
         use(DOMCategory) {
             worker.executeQuery(new VKRequest('likes.delete', [
                     owner_id: ownerId,
