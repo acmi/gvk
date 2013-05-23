@@ -28,7 +28,7 @@ class LikeIterator extends VKIterator<Like> {
     }
 
     @Override
-    protected void fillBuffer(Element response) {
+    protected void fillBuffer(Element response, Queue<Like> buffer) {
         use(DOMCategory) {
             response.users.uid.each {
                 Like like = new Like(

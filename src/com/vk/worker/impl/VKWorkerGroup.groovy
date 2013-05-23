@@ -16,7 +16,7 @@ import java.util.logging.Logger
  * @author acmi
  */
 @CompileStatic
-class VKWorkerGroup extends AbstractVKWorker {
+final class VKWorkerGroup extends AbstractVKWorker {
     private static final Logger log = Logger.getLogger(VKWorkerGroup.class.getName())
 
     private ScheduledExecutorService executors = Executors.newScheduledThreadPool(2)
@@ -33,6 +33,10 @@ class VKWorkerGroup extends AbstractVKWorker {
         Task task = new Task(token, requests)
         ScheduledFuture futureTask = executors.scheduleAtFixedRate(task, 0, WAIT_TIME_MILLIS, TimeUnit.MILLISECONDS)
         workers.put(token, futureTask)?.cancel(false)
+    }
+
+    void removeWorker(String token) {
+        workers.remove(token)?.cancel(false)
     }
 
     @Override
@@ -55,7 +59,7 @@ class VKWorkerGroup extends AbstractVKWorker {
         } catch (VKException vke) {
             switch (vke.code) {
                 case VKException.USER_AUTHORIZATION_FAILED:
-                    workers.remove(vke.requestParams['access_token'])
+                    removeWorker(vke.requestParams['access_token'])
                 case VKException.TOO_MANY_REQUESTS_PER_SECOND:
                     executeQuery(request)
                     break;

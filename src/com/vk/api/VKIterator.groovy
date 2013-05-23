@@ -14,8 +14,8 @@ abstract class VKIterator<T> implements Iterator<T> {
 
     protected Integer count
     private int processed
-    protected int bufferSize = 100
-    protected final Queue<T> buffer = new LinkedList<T>()
+    private int bufferSize = 100
+    private final Queue<T> buffer = new LinkedList<T>()
 
     public VKIterator(VKAnonymousWorker engine, String method, Map params, int offset) {
         this.engine = engine
@@ -25,6 +25,10 @@ abstract class VKIterator<T> implements Iterator<T> {
                 [(k): v]
         }
         this.offset = offset
+    }
+
+    protected void setBufferSize(int bufferSize) {
+        this.bufferSize = bufferSize
     }
 
     protected int getProcessed() {
@@ -50,7 +54,7 @@ abstract class VKIterator<T> implements Iterator<T> {
                 Map params = new HashMap(this.params)
                 params['count'] = bufferSize
                 params['offset'] = offset + getProcessed()
-                fillBuffer(engine.executeQuery(new VKRequest(method, params)))
+                fillBuffer(engine.executeQuery(new VKRequest(method, params)), buffer)
             } catch (Exception e) {
                 throw new RuntimeException(e)
             }
@@ -66,7 +70,7 @@ abstract class VKIterator<T> implements Iterator<T> {
         }
     }
 
-    protected abstract void fillBuffer(Element response) throws Exception
+    protected abstract void fillBuffer(Element response, Queue<T> buffer) throws Exception
 
     @Override
     public void remove() {

@@ -25,7 +25,7 @@ class WallIterator extends VKIterator<Post> {
     }
 
     @Override
-    protected void fillBuffer(Element response) throws Exception {
+    protected void fillBuffer(Element response, Queue<Post> buffer) throws Exception {
         use(DOMCategory) {
             response.post.each {
                 Post post = new Post(

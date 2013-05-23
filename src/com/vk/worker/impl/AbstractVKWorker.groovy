@@ -4,6 +4,7 @@ import com.vk.worker.VKAnonymousWorker
 import com.vk.worker.VKCaptchaNeededException
 import com.vk.worker.VKException
 import com.vk.worker.VKRequest
+import groovy.transform.CompileStatic
 import groovy.transform.PackageScope
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -16,11 +17,15 @@ import java.util.concurrent.TimeUnit
  * @author acmi
  */
 @PackageScope
+@CompileStatic
 abstract class AbstractVKWorker implements VKAnonymousWorker {
     private static final int REQUESTS_PER_SECOND = 3
     protected static final long WAIT_TIME_MILLIS = (TimeUnit.SECONDS.toMillis(1) / REQUESTS_PER_SECOND).longValue()
 
     protected final Queue<Request> requests = new LinkedList<Request>()
+
+    final Set<String> cachingMethods = new HashSet<String>()
+    private final Map<VKRequest, Element> cache = [:]
 
     private final DocumentBuilder xmlBuilder
 
@@ -51,9 +56,13 @@ abstract class AbstractVKWorker implements VKAnonymousWorker {
 
     @Override
     Element executeQuery(VKRequest request) throws IOException, VKException {
+        Element result = cache[request]
+        if (result != null)
+            return result
+
         String xmlString = _executeQuery(request)
         Document document = xmlBuilder.parse(new ByteArrayInputStream(xmlString.getBytes()))
-        Element result = document.getDocumentElement()
+        result = document.getDocumentElement()
         if (result.getTagName().equals("error")) {
             int errorCode
             String errorMsg
@@ -75,6 +84,8 @@ abstract class AbstractVKWorker implements VKAnonymousWorker {
 
             throw new VKException(errorCode, errorMsg, requestParams)
         }
+        if (cachingMethods.contains(request.method))
+            cache[request] = result
 
         return result
     }

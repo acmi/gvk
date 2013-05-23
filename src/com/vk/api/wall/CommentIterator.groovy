@@ -7,6 +7,8 @@ import groovy.transform.PackageScope
 import groovy.xml.dom.DOMCategory
 import org.w3c.dom.Element
 
+import java.util.concurrent.TimeUnit
+
 /**
  * @author acmi
  */
@@ -41,14 +43,14 @@ class CommentIterator extends VKIterator<Comment> {
     }
 
     @Override
-    protected void fillBuffer(Element response) {
+    protected void fillBuffer(Element response, Queue<Comment> buffer) {
         use(DOMCategory) {
             response.comment.each {
                 Comment comment = new Comment(
                         ownerId,
                         it.cid.text().toInteger(),
                         it.uid.text().toInteger(),
-                        new Date(it.date.text().toLong() * 1000),
+                        new Date(TimeUnit.SECONDS.toMillis(it.date.text().toLong())),
                         it.text.text()
                 )
 
