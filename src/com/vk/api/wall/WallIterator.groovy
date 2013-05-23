@@ -13,12 +13,15 @@ import java.util.concurrent.TimeUnit
  */
 @PackageScope
 class WallIterator extends VKIterator<Post> {
+    private final int ownerId
 
     WallIterator(VKWorker engine, int ownerId, int offset, Filter filter) {
         super(engine, 'wall.get', [
                 owner_id: ownerId,
                 filter: filter
         ], offset)
+
+        this.ownerId = ownerId
     }
 
     @Override
@@ -28,6 +31,7 @@ class WallIterator extends VKIterator<Post> {
                 Post post = new Post(
                         new Date(TimeUnit.SECONDS.toMillis(it.date.text().toLong())),
                         it.text.text(),
+                        ownerId,
                         it.id.text().toInteger(),
                         it.from_id.text().toInteger(),
                         it.to_id.text().toInteger(),

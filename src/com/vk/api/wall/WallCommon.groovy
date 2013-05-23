@@ -1,10 +1,13 @@
 package com.vk.api.wall
 
 import com.vk.api.Identifier
+import com.vk.api.Info
 import com.vk.api.VKException
 import com.vk.api.VKRequest
 import com.vk.api.VKWorker
+import com.vk.api.groups.GroupsCommon
 import com.vk.api.likes.Like
+import com.vk.api.users.UsersCommon
 import groovy.xml.dom.DOMCategory
 
 import java.util.concurrent.TimeUnit
@@ -83,5 +86,33 @@ class WallCommon {
      */
     static Iterator<Like> getLikes(VKWorker worker, int ownerId, int postId, int offset = 0, boolean publishedOnly = false, boolean friendsOnly = false) {
         new LikeIterator(worker, ownerId, postId, offset, publishedOnly, friendsOnly)
+    }
+
+    static Info getToInfo(Post post, VKWorker worker) throws IOException, VKException {
+        int id = post.to
+        if (id < 0) {
+            return GroupsCommon.getById(worker, -id)
+        } else if (id > 0) {
+            return UsersCommon.get(worker, id)
+        }
+        null
+    }
+
+    static Info getFromInfo(Post post, VKWorker worker) throws IOException, VKException {
+        int id = post.from
+        if (id < 0) {
+            return GroupsCommon.getById(worker, -id)
+        } else if (id > 0) {
+            return UsersCommon.get(worker, id)
+        }
+        null
+    }
+
+    static Iterator<Comment> getComments(Post post, VKWorker worker, int offset = 0, Sort sort = Sort.asc) {
+        getComments(worker, post.identifier.ownerId, post.identifier.mediaId, offset, sort)
+    }
+
+    static Iterator<Like> getLikes(Post post, VKWorker worker, int offset = 0, boolean publishedOnly = false, boolean friendsOnly = false){
+        getLikes(worker, post.identifier.ownerId, post.identifier.mediaId, offset, publishedOnly, friendsOnly)
     }
 }

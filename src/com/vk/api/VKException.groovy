@@ -7,10 +7,10 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 class VKException extends Exception{
-    final Integer code
+    final int code
     final Map<String, String> requestParams = [:]
 
-    VKException(Integer code, String message, Map requestParams){
+    VKException(int code, String message, Map requestParams){
         super(message)
         this.code = code
         this.requestParams.putAll(requestParams)

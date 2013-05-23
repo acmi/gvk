@@ -137,13 +137,16 @@ final class VKWorkerUser implements VKWorker {
                 requestParams.put(ps.item(1).getTextContent(), ps.item(3).getTextContent())
             }
 
-            if (errorCode == VKException.CAPTCHA_NEEDED) {
-                String captchaSid = result.getElementsByTagName("captcha_sid").item(0).getTextContent()
-                String captchaImg = result.getElementsByTagName("captcha_img").item(0).getTextContent()
-                throw new VKCaptchaNeededException(errorMsg, requestParams, captchaSid, captchaImg)
+            switch(errorCode){
+                case VKException.TOO_MANY_REQUESTS_PER_SECOND:
+                    return executeQuery(request);
+                case VKException.CAPTCHA_NEEDED:
+                    String captchaSid = result.getElementsByTagName("captcha_sid").item(0).getTextContent()
+                    String captchaImg = result.getElementsByTagName("captcha_img").item(0).getTextContent()
+                    throw new VKCaptchaNeededException(errorMsg, requestParams, captchaSid, captchaImg)
+                default:
+                    throw new VKException(errorCode, errorMsg, requestParams)
             }
-
-            throw new VKException(errorCode, errorMsg, requestParams)
         }
 
         return result
