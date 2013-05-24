@@ -47,9 +47,16 @@ class UsersCommon {
      * @throws VKException
      */
     static User get(VKAnonymousWorker worker, uid, NameCase nameCase = NameCase.nom) throws IOException, VKException {
-        Iterator<User> it = get(worker, [uid], nameCase)
-        if (it.hasNext())
-            return it.next()
+        try {
+            Iterator<User> it = get(worker, [uid], nameCase)
+            if (it.hasNext())
+                return it.next()
+        } catch (VKException vke) {
+            if (vke.code == VKException.INVALID_USER_ID)
+                return null
+
+            throw vke
+        }
         null
     }
 }

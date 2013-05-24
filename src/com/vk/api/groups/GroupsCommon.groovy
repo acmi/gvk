@@ -44,9 +44,16 @@ class GroupsCommon {
      * @throws VKException
      */
     static Group getById(VKAnonymousWorker worker, gid) throws IOException, VKException {
-        Iterator<Group> it = getById(worker, [gid])
-        if (it.hasNext())
-            return it.next()
+        try {
+            Iterator<Group> it = getById(worker, [gid])
+            if (it.hasNext())
+                return it.next()
+        } catch (VKException vke) {
+            if (vke.code == VKException.ONE_OF_THE_PARAMETERS_SPECIFIED_WAS_MISSING_OR_INVALID)
+                return null
+
+            throw vke
+        }
         null
     }
 }
