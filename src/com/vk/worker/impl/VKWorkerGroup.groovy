@@ -36,7 +36,8 @@ final class VKWorkerGroup extends AbstractVKWorker {
     }
 
     void removeWorker(String token) {
-        workers.remove(token)?.cancel(false)
+        def worker = workers.remove(token)
+        worker?.cancel(false)
     }
 
     @Override
