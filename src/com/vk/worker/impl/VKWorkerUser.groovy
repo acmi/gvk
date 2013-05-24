@@ -26,18 +26,13 @@ final class VKWorkerUser extends AbstractVKWorker implements VKIdentifiedWorker 
         this.token = token
 
         Task workerTask = new Task(token, requests)
-        executionTimer = new Timer()
+        executionTimer = new Timer(true)
         executionTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 workerTask.run()
             }
         }, 0, WAIT_TIME_MILLIS)
-    }
-
-    @Override
-    void stop() {
-        executionTimer.cancel()
     }
 
     @Override

@@ -5,10 +5,12 @@ import com.vk.worker.VKRequest
 import groovy.transform.CompileStatic
 import org.w3c.dom.Element
 
-import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.ThreadFactory
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -19,7 +21,7 @@ import java.util.logging.Logger
 final class VKWorkerGroup extends AbstractVKWorker {
     private static final Logger log = Logger.getLogger(VKWorkerGroup.class.getName())
 
-    private ScheduledExecutorService executors = Executors.newScheduledThreadPool(2)
+    private ScheduledExecutorService executors = new ScheduledThreadPoolExecutor(1, new VKWorkerThreadFactory())
 
     private final Map<String, ScheduledFuture> workers = [:]
 
@@ -41,11 +43,6 @@ final class VKWorkerGroup extends AbstractVKWorker {
             worker.cancel(false)
             log.log(Level.INFO, "worker removed: $token")
         }
-    }
-
-    @Override
-    void stop() {
-        executors.shutdownNow()
     }
 
     @Override
@@ -72,6 +69,23 @@ final class VKWorkerGroup extends AbstractVKWorker {
                 default:
                     throw vke
             }
+        }
+    }
+    private static class VKWorkerThreadFactory implements ThreadFactory{
+        private static final AtomicInteger poolNumber = new AtomicInteger(1)
+        private final AtomicInteger threadNumber = new AtomicInteger(1)
+        private final String namePrefix
+
+        VKWorkerThreadFactory(){
+            namePrefix = "VKWorkerPool-${poolNumber.getAndIncrement()}-thread-"
+        }
+
+        @Override
+        Thread newThread(Runnable r) {
+            Thread thread = new Thread(null, r, namePrefix + threadNumber.getAndIncrement())
+            thread.daemon = true
+            thread.priority = Thread.NORM_PRIORITY
+            thread
         }
     }
 }

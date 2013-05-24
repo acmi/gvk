@@ -39,8 +39,6 @@ abstract class AbstractVKWorker implements VKAnonymousWorker {
         requests.size()
     }
 
-    abstract void stop()
-
     protected String _executeQuery(VKRequest request) throws IOException, InterruptedException {
         ObjectHolder<Object> holder = new ObjectHolder<Object>()
         requests.offer(new Request(request, holder))
