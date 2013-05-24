@@ -37,7 +37,10 @@ final class VKWorkerGroup extends AbstractVKWorker {
 
     void removeWorker(String token) {
         def worker = workers.remove(token)
-        worker?.cancel(false)
+        if (worker != null){
+            worker.cancel(false)
+            log.log(Level.INFO, "worker removed: $token")
+        }
     }
 
     @Override
@@ -60,7 +63,9 @@ final class VKWorkerGroup extends AbstractVKWorker {
         } catch (VKException vke) {
             switch (vke.code) {
                 case VKException.USER_AUTHORIZATION_FAILED:
-                    removeWorker(vke.requestParams['access_token'])
+                    def token = vke.requestParams['access_token']
+                    log.log(Level.INFO, "$vke.message: $token")
+                    removeWorker(token)
                 case VKException.TOO_MANY_REQUESTS_PER_SECOND:
                     executeQuery(request)
                     break;
