@@ -1,5 +1,6 @@
 package com.vk.api.wall
 
+import com.vk.api.Identifier
 import com.vk.api.VKIterator
 import com.vk.worker.VKAnonymousWorker
 import com.vk.worker.VKException
@@ -42,12 +43,11 @@ class WallIterator extends VKIterator<Post> {
         use(DOMCategory) {
             response.post.each {
                 Post post = new Post(
-                        new Date(TimeUnit.SECONDS.toMillis(it.date.text().toLong())),
-                        it.text.text(),
-                        ownerId,
-                        it.id.text().toInteger(),
+                        new Identifier(ownerId, it.id.text().toInteger(), Identifier.Type.post),
                         it.from_id.text().toInteger(),
                         it.to_id.text().toInteger(),
+                        new Date(TimeUnit.SECONDS.toMillis(it.date.text().toLong())),
+                        it.text.text(),
                 )
 
                 buffer << post

@@ -33,7 +33,7 @@ class LikeIterator extends VKIterator<Like> {
             response.users.uid.each {
                 Like like = new Like(
                         it.text().toInteger(),
-                        filter == Likes.Filter.copies
+                        filter == Filter.copies
                 )
 
                 buffer << like

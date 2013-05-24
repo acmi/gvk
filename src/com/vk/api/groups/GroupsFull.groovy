@@ -1,4 +1,5 @@
 package com.vk.api.groups
+
 /**
  * @author acmi
  */

@@ -197,13 +197,15 @@ class WallFull extends WallCommon {
             Map params = [
                     owner_id: ownerId,
                     post_id: postId,
-                    reply_to_cid: replyToCid
+                    text: text,
+                    reply_to_cid: replyToCid,
+                    attachments: attachments.collect {it.toString(true)}.join(',')
             ]
             if (text?.length() > 0)
                 params['text'] = text
             if (attachments?.size() > 0)
                 params['attachments'] = attachments.collect { it.toString(true) }.join(',')
-            engine.executeQuery(new VKRequest('wall.restore', params)).cid.text().toInteger()
+            engine.executeQuery(new VKRequest('wall.addComment', params)).cid.text().toInteger()
         }
     }
 
@@ -275,9 +277,11 @@ class WallFull extends WallCommon {
      */
     static Map<String, Integer> addLike(VKIdentifiedWorker engine, int ownerId, int postId, boolean repost = false, String message = null) throws IOException, VKException {
         use(DOMCategory) {
-            def response = engine.executeQuery(new VKRequest('wall.restoreComment', [
+            def response = engine.executeQuery(new VKRequest('wall.addLike', [
                     owner_id: ownerId,
-                    cid: cid
+                    post_id: postId,
+                    repost: repost ? 1 : 0,
+                    message: message
             ]))
             [
                     likes: response.likes.text().toInteger(),

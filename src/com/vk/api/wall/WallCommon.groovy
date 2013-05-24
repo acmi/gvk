@@ -108,10 +108,29 @@ class WallCommon {
         null
     }
 
+    /**
+     * Возвращает список комментариев к записи.
+     *
+     * @param post
+     * @param worker
+     * @param offset смещение, необходимое для выборки определенного подмножества комментариев.
+     * @param sort порядок сортировки комментариев.
+     * @return
+     */
     static Iterator<Comment> getComments(Post post, VKAnonymousWorker worker, int offset = 0, Sort sort = Sort.asc) {
         getComments(worker, post.identifier.ownerId, post.identifier.mediaId, offset, sort)
     }
 
+    /**
+     * Получает информацию о пользователях, которые добавили указанную запись в свой список Мне нравится. Список пользователей отсортирован в порядке убывания добавления записи в список Мне нравится.
+     *
+     * @param post
+     * @param worker
+     * @param offset смещение, относительно начала списка, для выборки определенного подмножества.
+     * @param publishedOnly указывает, что необходимо вернуть информацию только пользователях, опубликовавших данную запись у себя на стене.
+     * @param friendsOnly указывает, необходимо ли возвращать только пользователей, которые являются друзьями текущего пользователя.
+     * @return
+     */
     static Iterator<Like> getLikes(Post post, VKAnonymousWorker worker, int offset = 0, boolean publishedOnly = false, boolean friendsOnly = false) {
         getLikes(worker, post.identifier.ownerId, post.identifier.mediaId, offset, publishedOnly, friendsOnly)
     }

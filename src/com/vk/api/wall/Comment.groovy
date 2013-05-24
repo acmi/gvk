@@ -2,25 +2,20 @@ package com.vk.api.wall
 
 import com.vk.api.Identifier
 import com.vk.api.Message
-import groovy.transform.Canonical
+import groovy.transform.Immutable
 
 /**
  * @author acmi
  */
-@Canonical
-final class Comment extends Message {
-    final Identifier identifier
-    final int user
-
-    Comment(int ownerId, int id, int user, Date date, String text) {
-        super(date, text)
-
-        this.identifier = new Identifier(ownerId, id, Identifier.Type.comment)
-        this.user = user
-    }
+@Immutable
+class Comment implements Message {
+    Identifier identifier
+    int user
+    Date date
+    String text
 
     @Override
     String toString() {
-        "${user} ${date}: ${text}"
+        "${user}(${date}): ${text}"
     }
 }

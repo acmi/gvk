@@ -1,5 +1,6 @@
 package com.vk.api.wall
 
+import com.vk.api.Identifier
 import com.vk.api.VKIterator
 import com.vk.worker.VKAnonymousWorker
 import com.vk.worker.VKException
@@ -46,8 +47,7 @@ class CommentIterator extends VKIterator<Comment> {
         use(DOMCategory) {
             response.comment.each {
                 Comment comment = new Comment(
-                        ownerId,
-                        it.cid.text().toInteger(),
+                        new Identifier(ownerId, it.cid.text().toInteger(), Identifier.Type.comment),
                         it.uid.text().toInteger(),
                         new Date(TimeUnit.SECONDS.toMillis(it.date.text().toLong())),
                         it.text.text()

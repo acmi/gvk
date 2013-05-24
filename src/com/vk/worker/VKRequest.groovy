@@ -7,6 +7,6 @@ import groovy.transform.Immutable
  */
 @Immutable
 class VKRequest {
-    final String method
-    final Map params
+    String method
+    Map params
 }
