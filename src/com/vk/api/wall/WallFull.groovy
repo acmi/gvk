@@ -36,7 +36,7 @@ class WallFull extends WallCommon {
      * @throws IOException
      * @throws VKException
      */
-    static Iterator<Post> getById(VKIdentifiedWorker engine, List<Identifier> posts) throws IOException, VKException {
+    static Iterator<Post> getById(VKIdentifiedWorker engine, Collection<Identifier> posts) throws IOException, VKException {
         use(DOMCategory) {
             Map params = [:]
             if (posts?.size() > 0)
@@ -192,7 +192,7 @@ class WallFull extends WallCommon {
      * @throws IOException
      * @throws VKException
      */
-    static int addComment(VKIdentifiedWorker engine, int ownerId, int postId, String text, int replyToCid = 0, List<Identifier> attachments = null) throws IOException, VKException {
+    static int addComment(VKIdentifiedWorker engine, int ownerId, int postId, String text, int replyToCid = 0, Collection<Identifier> attachments = null) throws IOException, VKException {
         use(DOMCategory) {
             Map params = [
                     owner_id: ownerId,

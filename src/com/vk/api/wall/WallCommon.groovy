@@ -39,7 +39,7 @@ class WallCommon {
      * @throws IOException
      * @throws VKException
      */
-    static Iterator<Post> getById(VKAnonymousWorker worker, List<Identifier> posts) throws IOException, VKException {
+    static Iterator<Post> getById(VKAnonymousWorker worker, Collection<Identifier> posts) throws IOException, VKException {
         use(DOMCategory) {
             Map params = [:]
             if (posts?.size() > 0)

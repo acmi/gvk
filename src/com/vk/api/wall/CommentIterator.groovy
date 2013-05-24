@@ -34,11 +34,10 @@ class CommentIterator extends VKIterator<Comment> {
         try {
             return super.getCount()
         } catch (VKException vke) {
-            if (vke.code == 212) {//Access to post comments denied
+            if (vke.code == VKException.ACCESS_TO_POST_COMMENTS_DENIED)
                 return 0
-            } else {
-                throw vke
-            }
+
+            throw vke
         }
     }
 

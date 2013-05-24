@@ -19,7 +19,7 @@ class UsersCommon {
      * @throws IOException
      * @throws VKException
      */
-    static Iterator<User> get(VKAnonymousWorker worker, List uids, NameCase nameCase = NameCase.nom) throws IOException, VKException {
+    static Iterator<User> get(VKAnonymousWorker worker, Collection uids, NameCase nameCase = NameCase.nom) throws IOException, VKException {
         use(DOMCategory) {
             worker.executeQuery(new VKRequest('users.get', [
                     uids: uids.join(','),

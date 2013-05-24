@@ -19,4 +19,6 @@ class VKException extends Exception {
     public static final int USER_AUTHORIZATION_FAILED = 5
     public static final int TOO_MANY_REQUESTS_PER_SECOND = 6
     public static final int CAPTCHA_NEEDED = 14
+    public static final int USER_WAS_DELETED_OR_BANNED = 18
+    public static final int ACCESS_TO_POST_COMMENTS_DENIED = 212
 }

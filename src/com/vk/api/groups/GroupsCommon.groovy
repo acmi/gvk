@@ -18,7 +18,7 @@ class GroupsCommon {
      * @throws IOException
      * @throws VKException
      */
-    static Iterator<Group> getById(VKAnonymousWorker worker, List gids) throws IOException, VKException {
+    static Iterator<Group> getById(VKAnonymousWorker worker, Collection gids) throws IOException, VKException {
         use(DOMCategory) {
             Element response = worker.executeQuery(new VKRequest('groups.getById', [
                     gids: gids.join(','),

@@ -24,7 +24,7 @@ abstract class AbstractVKWorker implements VKAnonymousWorker {
 
     protected final Queue<Request> requests = new LinkedList<Request>()
 
-    final Set<String> cachingMethods = new HashSet<String>()
+    final Set<String> cacheableMethods = new HashSet<String>()
     private final Map<VKRequest, Element> cache = [:]
 
     private final DocumentBuilder xmlBuilder
@@ -84,7 +84,7 @@ abstract class AbstractVKWorker implements VKAnonymousWorker {
 
             throw new VKException(errorCode, errorMsg, requestParams)
         }
-        if (cachingMethods.contains(request.method))
+        if (cacheableMethods.contains(request.method))
             cache[request] = result
 
         return result

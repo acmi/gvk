@@ -2,6 +2,7 @@ package com.vk.api.wall
 
 import com.vk.api.VKIterator
 import com.vk.worker.VKAnonymousWorker
+import com.vk.worker.VKException
 import groovy.transform.PackageScope
 import groovy.xml.dom.DOMCategory
 import org.w3c.dom.Element
@@ -22,6 +23,18 @@ class WallIterator extends VKIterator<Post> {
         ], offset)
 
         this.ownerId = ownerId
+    }
+
+    @Override
+    protected int getCount() throws Exception {
+        try{
+            return super.getCount()
+        }catch(VKException vke){
+            if (vke.code == VKException.USER_WAS_DELETED_OR_BANNED)
+                return 0
+
+            throw vke
+        }
     }
 
     @Override
