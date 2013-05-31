@@ -1,5 +1,6 @@
 package com.vk.api.status
 
+import com.vk.api.audio.Audio
 import groovy.transform.Immutable
 
 /**
@@ -8,4 +9,5 @@ import groovy.transform.Immutable
 @Immutable
 class Status {
     String text
+    Audio audio
 }

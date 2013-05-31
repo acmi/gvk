@@ -44,6 +44,7 @@ class WallFull extends WallCommon {
             def response = engine.executeQuery(new VKRequest('wall.getById', params))
             response.post.collect {
                 new Post(
+                        new Identifier(it.to_id.text().toInteger(), it.id.text().toInteger(), Identifier.Type.post),
                         new Date(TimeUnit.SECONDS.toMillis(it.date.text().toLong())),
                         it.text.text(),
                         it.id.text().toInteger(),
@@ -51,6 +52,29 @@ class WallFull extends WallCommon {
                         it.to_id.text().toInteger(),
                 )
             }.iterator()
+        }
+    }
+
+    /**
+     * Возвращает запись со стены пользователя по идентификатору.
+     *
+     * @param engine VKAnonymousWorker
+     * @param posts перечисленные через запятую идентификаторы, которые представляют собой идущие через знак подчеркивания id владельцев стен и id самих записей на стене. Пример: 93388_21539,93388_20904,2943_4276
+     * @return Итератор постов
+     * @throws IOException
+     * @throws VKException
+     */
+    static Post getById(VKIdentifiedWorker engine, Identifier id)  throws IOException, VKException {
+        use(DOMCategory) {
+            def response = engine.executeQuery(new VKRequest('wall.getById', [posts: id.toString(false)]))
+
+            new Post(
+                    id,
+                    response.post.from_id.text().toInteger(),
+                    response.post.to_id.text().toInteger(),
+                    new Date(TimeUnit.SECONDS.toMillis(response.post.date.text().toLong())),
+                    response.post.text.text(),
+            )
         }
     }
 

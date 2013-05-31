@@ -2,7 +2,12 @@ package com.vk.api.other
 
 import com.vk.api.Info
 import com.vk.api.groups.GroupsCommon
+import com.vk.api.status.Status
+import com.vk.api.status.StatusCommon
 import com.vk.api.users.UsersCommon
+import com.vk.api.wall.Filter
+import com.vk.api.wall.Post
+import com.vk.api.wall.WallCommon
 import com.vk.worker.VKAnonymousWorker
 import com.vk.worker.VKException
 import com.vk.worker.VKRequest
@@ -78,7 +83,7 @@ class OtherCommon {
 
     static Info getInfo(VKAnonymousWorker worker, id) throws IOException, VKException {
         if (id instanceof Number)
-            getInfoById(worker, id)
+            getInfoById(worker, id.intValue())
 
         try {
             id = Integer.valueOf(id.toString())
@@ -87,4 +92,21 @@ class OtherCommon {
             return getInfoByScreenName(worker, id)
         }
     }
+
+    /**
+     * {@link com.vk.api.wall.WallCommon#get(com.vk.worker.VKAnonymousWorker, int, int, com.vk.api.wall.Filter)}
+     * @param user
+     * @param worker
+     * @param offset
+     * @param filter
+     * @return
+     */
+    static Iterator<Post> getWall(Info user, VKAnonymousWorker worker, int offset = 0, Filter filter = Filter.all){
+        WallCommon.get(worker, user.id, offset, filter)
+    }
+
+    static Status getStatus(Info user, VKAnonymousWorker worker){
+        StatusCommon.get(worker, user.id)
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.vk.api.status
 
+import com.vk.api.audio.Audio
 import com.vk.worker.VKAnonymousWorker
 import com.vk.worker.VKException
 import com.vk.worker.VKRequest
@@ -23,7 +24,18 @@ class StatusCommon {
             def response = worker.executeQuery(new VKRequest('status.get', [uid: uid]))
 
             new Status(
-                    response.text.text()
+                    response.text.text(),
+                    response.audio.size() == 0 ? null :
+                        new Audio(
+                                response.audio.aid.text().toInteger(),
+                                response.audio.owner_id.text().toInteger(),
+                                response.audio.artist.text(),
+                                response.audio.title.text(),
+                                response.audio.duration.text().toInteger(),
+                                response.audio.url.text(),
+                                response.audio.performer.text(),
+                                response.audio.lyrics_id.text().toInteger()
+                        )
             )
         }
     }
