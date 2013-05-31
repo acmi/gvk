@@ -22,7 +22,6 @@ class GroupsCommon {
         use(DOMCategory) {
             Element response = worker.executeQuery(new VKRequest('groups.getById', [
                     gids: gids.join(','),
-//                    fields: ['gid', 'name', 'screen_name'].join(',')
             ]))
             response.group.collect { Element group ->
                 new Group(

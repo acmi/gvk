@@ -1,5 +1,6 @@
 package com.vk.api.status
 
+import com.vk.api.Identifier
 import com.vk.api.audio.Audio
 import com.vk.worker.VKAnonymousWorker
 import com.vk.worker.VKException
@@ -13,7 +14,7 @@ class StatusCommon {
     /**
      * Получает текст статуса пользователя.
      *
-     * @param worker VKAnonymousWorker
+     * @param worker {@link VKAnonymousWorker}
      * @param uid идентификатор пользователя, статус которого необходимо получить.
      * @return В случае успеха возвращает объект, у которого в поле text содержится текст статуса пользователя.
      * @throws IOException
@@ -27,8 +28,11 @@ class StatusCommon {
                     response.text.text(),
                     response.audio.size() == 0 ? null :
                         new Audio(
-                                response.audio.aid.text().toInteger(),
-                                response.audio.owner_id.text().toInteger(),
+                                new Identifier(
+                                        response.audio.owner_id.text().toInteger(),
+                                        response.audio.aid.text().toInteger(),
+                                        Identifier.Type.audio
+                                ),
                                 response.audio.artist.text(),
                                 response.audio.title.text(),
                                 response.audio.duration.text().toInteger(),

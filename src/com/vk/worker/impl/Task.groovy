@@ -42,13 +42,16 @@ class Task implements Runnable {
                     method.append("&")
                     method.append(param.getKey())
                     method.append("=")
-                    method.append(param.getValue())
+//                    method.append(param.getValue())
+                    method.append(URLEncoder.encode(param.getValue().toString(), 'UTF-8'))
                 }
             }
 
-            log.log(Level.FINE, method.toString())
+            def urlStr = method.toString() //URLEncoder.encode(method.toString(), 'UTF-8')
 
-            URL url = new URL(PROTOCOL, HOST, method.toString())
+            log.log(Level.FINE, urlStr)
+
+            URL url = new URL(PROTOCOL, HOST, urlStr)
             response = url.openConnection().inputStream.getText('UTF-8')
 
             log.log(Level.FINE, response.toString())

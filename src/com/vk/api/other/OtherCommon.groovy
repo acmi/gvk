@@ -20,21 +20,6 @@ import java.util.concurrent.TimeUnit
  */
 class OtherCommon {
     /**
-     * Данный метод возвращает информацию о том, установил ли текущий пользователь приложение или нет.
-     *
-     * @param worker VKAnonymousWorker
-     * @param uid ID пользователя.
-     * @return Метод isAppUser возвращает true в случае, если пользователь установил у себя данное приложение, иначе false.
-     * @throws IOException
-     * @throws VKException
-     */
-    static boolean isAppUser(VKAnonymousWorker worker, int uid) throws IOException, VKException {
-        use(DOMCategory) {
-            worker.executeQuery(new VKRequest('isAppUser', [uid: uid])).text() == '1'
-        }
-    }
-
-    /**
      * Получает настройки текущего пользователя в данном приложении.
      *
      * @param worker VKAnonymousWorker

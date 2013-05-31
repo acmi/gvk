@@ -11,9 +11,9 @@ import groovy.xml.dom.DOMCategory
  */
 class StatusFull extends StatusCommon {
     /**
-     * Получает текст статуса пользователя.
+     * {@link StatusCommon#get(com.vk.worker.VKAnonymousWorker, int)}
      *
-     * @param worker VKAnonymousWorker
+     * @param worker {@link VKIdentifiedWorker}
      * @param uid идентификатор пользователя, статус которого необходимо получить. Если параметр не задан, то считается, что он равен идентификатору текущего пользователя.
      * @return В случае успеха возвращает объект, у которого в поле text содержится текст статуса пользователя.
      * @throws IOException
@@ -23,7 +23,17 @@ class StatusFull extends StatusCommon {
         StatusCommon.get(worker, uid)
     }
 
-    static Boolean set(VKIdentifiedWorker worker, String text = null, Identifier audio = null) {
+    /**
+     * Устанавливает новый статус текущему пользователю.
+     *
+     * @param worker {@link VKIdentifiedWorker}
+     * @param text текст нового статуса.
+     * @param audio идентификатор аудиозаписи, которая будет отображаться в статусе.
+     * @return В случае успешной установки или очистки статуса возвращает true.     .
+     * @throws IOException
+     * @throws VKException
+     */
+    static Boolean set(VKIdentifiedWorker worker, String text = null, Identifier audio = null) throws IOException, VKException{
         use(DOMCategory) {
             worker.executeQuery(new VKRequest('status.set', [
                     text: text,
